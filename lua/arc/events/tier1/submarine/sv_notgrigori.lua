@@ -189,7 +189,10 @@ local function CreateNotGrigori(theTable)
 			notMonk:SetNWFloat("CustomHealth", 1000)
 			notMonk:SetNWBool("isdead", false)
 			notMonk:Give("weapon_annabelle")
-			
+
+			GM13.Ent:BlockPhysgun(notMonk, true)
+			GM13.Ent:BlockToolgun(notMonk, true)
+			GM13.Ent:BlockContextMenu(notMonk, true)
 			GM13.NPC:AttackClosestPlayer(notMonk)
 			GM13.Ent:SetDamageCallback(notMonk, CheckGrigoriHealth)
 
