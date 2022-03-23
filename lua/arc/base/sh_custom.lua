@@ -2,6 +2,11 @@
 function CGM13.Custom:ProximityTrigger(eventName, touchType, ent, pos, height, size, callback, ...)
     if not isfunction(callback) then return end
 
+    if ent.proximityTrigger then
+        GM13.Event:RemoveRenderInfoEntity(ent.proximityTrigger)
+        ent.proximityTrigger:Remove()
+    end
+
     local args = { ... }
 
     local function SetVeryNearTriggerPos(proximityTrigger)
@@ -11,6 +16,7 @@ function CGM13.Custom:ProximityTrigger(eventName, touchType, ent, pos, height, s
     local proximityTrigger = ents.Create("gm13_trigger")
     SetVeryNearTriggerPos(proximityTrigger)
     proximityTrigger:SetParent(ent)
+    ent.proximityTrigger = proximityTrigger
 
     proximityTrigger[touchType] = function (self, ent)
         callback(ent, unpack(args))
