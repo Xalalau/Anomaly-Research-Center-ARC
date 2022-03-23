@@ -156,19 +156,33 @@ local function DestroyProps(tablePos)
 end
 
 local function CreateNotGrigori(theTable)
-	theTable:EmitSound("vo/ravenholm/madlaugh03.wav")
+	theTable:EmitSound("vo/ravenholm/madlaugh0" .. math.random(1, 4) .. ".wav")
+
+	local notMonkTaunts = {
+		"vo/ravenholm/engage04.wav",
+		"vo/ravenholm/engage05.wav",
+		"vo/ravenholm/firetrap_welldone.wav",
+		"vo/ravenholm/monk_kill03.wav",
+		"vo/ravenholm/monk_kill07.wav",
+		"vo/ravenholm/monk_kill10.wav",
+		"vo/ravenholm/monk_kill11.wav",
+		"vo/ravenholm/pyre_anotherlife.wav",
+		"vo/ravenholm/monk_mourn05.wav",
+		"vo/ravenholm/monk_mourn07.wav"
+	}
 
 	timer.Simple(5, function()
 		if theTable:IsValid() then
-			theTable:EmitSound("vo/ravenholm/firetrap_welldone.wav")
+			theTable:EmitSound(notMonkTaunts[math.random(1, #notMonkTaunts)])
 		end
 	end)
 
 	timer.Simple(7, function()
 		if theTable:IsValid() then
-			local notMonk = ents.Create("npc_eli")
+			local notMonk = ents.Create("npc_monk")
 
 			notMonk.cgm13_crazy_grigori = true
+			notMonk:SetColor(color_black)
 			notMonk:SetPos(Vector(2540.65, 3558.35, -167.97))
 			notMonk:SetAngles(Angle(0, 190, 0))
 			notMonk:Spawn()
