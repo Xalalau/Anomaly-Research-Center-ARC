@@ -19,7 +19,11 @@ local function SetConeAutoHeal()
 
 		local currentLevel = GM13.Event.Memory:Get("coneLevel")
 
-		CGM13.Custom:ProximityTrigger(eventName, "Touch", curseDetector, curseDetector:GetPos(), 150, 75, function(ent)
+		if not currentLevel then return end
+
+		local areaMultiplier = currentLevel / 2 
+
+		CGM13.Custom:ProximityTrigger(eventName, "Touch", curseDetector, curseDetector:GetPos(), 150, 75 * areaMultiplier, function(ent)
 			if not ent:IsPlayer() and not ent:IsNPC() then return end
 
 			if ent:IsNPC() then 
@@ -89,13 +93,13 @@ local function SetConeAutoHeal()
 	end
 end
 
-local function CreateKit(grigori)
+local function CreateKit(kitPos)
 	local kit = ents.Create("prop_physics")
 
 	kit:SetNWBool("upgradekit", true)
 	kit:SetName("upgradekit")
 	kit:SetModel("models/weapons/w_package.mdl")
-	kit:SetPos(grigori:GetPos() + Vector(0, 0, 10))
+	kit:SetPos(kitPos + Vector(0, 0, 10))
 	kit:Spawn()
 
 	local timerName = "cgm13_upgradekit_check_" .. tostring(kit)
@@ -123,7 +127,7 @@ local function CreateKit(grigori)
 				end
 
 				if newLevel == 3 then
-					_PrintMessage(HUD_PRINTTALK, "Level 3 Curse Detector: Each time a player gets healed, the player gains armor of the same amount.")
+					_PrintMessage(HUD_PRINTTALK, "Level 3 Curse Detector: Each time a player gets healed, the player gains armor of the same amount. Every level after 3 increases healing area.")
 				end
 
 				SetConeAutoHeal()
@@ -151,7 +155,7 @@ local function CheckGrigoriHealth(target, dmginfo)
 	grigori:SetNWBool("isdead", true)
 	grigori:EmitSound("vo/ravenholm/monk_death07.wav")
 
-	CreateKit(grigori)
+	CreateKit(grigori:GetPos())
 
 	GM13.Ent:Dissolve(grigori, 1)
 
