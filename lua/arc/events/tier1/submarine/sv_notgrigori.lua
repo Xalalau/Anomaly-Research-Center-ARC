@@ -405,16 +405,16 @@ local function CreateEvent()
 		}
 	}
 
-	-- timer.Create("gm13_cone_level_event", 60, 0, function()
-	-- 	if GM13.Event.Memory:Get("coneLevel") == maxConeLevel then
-	-- 		timer.Remove("gm13_cone_level_event")	
-	-- 		return
-	-- 	end
+	timer.Create("gm13_cone_level_event", 60, 0, function()
+		if GM13.Event.Memory:Get("coneLevel") == maxConeLevel then
+			timer.Remove("gm13_cone_level_event")	
+			return
+		end
 
-		-- if math.random(1, 100) <= 25 then
+		if math.random(1, 100) <= 25 then
 			SpawnProps(propsTab)
-		-- end
-	-- end)
+		end
+	end)
 
     local itemCheckTrigger = ents.Create("gm13_trigger")
     itemCheckTrigger:Setup(eventName, "itemCheckTrigger", Vector(2388.6, 3654.7, -79), Vector(2188.6, 3454.7, -167.9))
