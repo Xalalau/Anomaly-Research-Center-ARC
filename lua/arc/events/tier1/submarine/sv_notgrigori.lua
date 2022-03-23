@@ -13,20 +13,33 @@ end
 
 local function SetConeAutoHeal()
 	local curseDetector = ents.FindByClass("gm13_sent_curse_detector")[1]
-	
+
 	if curseDetector then
 		curseDetector:SetNWBool("readyheal", true)
 
+		local currentLevel = GM13.Event.Memory:Get("coneLevel")
+
 		CGM13.Custom:ProximityTrigger(eventName, "Touch", curseDetector, curseDetector:GetPos(), 150, 75, function(ent)
-			if not ent:IsPlayer() then return end
+			if not ent:IsPlayer() and not ent:IsNPC() then return end
 
-			local ply = ent
+			if ent:IsNPC() then 
+				local somePlayer
 
-			if ply:Health() == ply:GetMaxHealth() then return end
+				for k, v in ipairs(player.GetHumans()) do
+					somePlayer = v
+					break
+				end
+				
+				if ent:Disposition(somePlayer) < 3 then -- https://wiki.facepunch.com/gmod/Enums/D
+					return
+				end
+			end
+
+			if ent:Health() == ent:GetMaxHealth() then return end
 
 			if curseDetector:GetNWBool("readyheal") then
 				local effectdata = EffectData()
-				effectdata:SetOrigin(ply:GetPos())
+				effectdata:SetOrigin(ent:EyePos() - Vector(0, 0, 20))
 				effectdata:SetStart(curseDetector.light:GetPos())
 
 				curseDetector.light:SetColor(Color(47, 225, 237, 255))
@@ -44,31 +57,28 @@ local function SetConeAutoHeal()
 			if curseDetector:GetNWBool("readyheal") then
 				curseDetector:SetNWBool("readyheal", false)
 
-				local currentLevel = GM13.Event.Memory:Get("coneLevel")
-
 				timer.Simple(2 / currentLevel, function()
 					if curseDetector:IsValid() then
 						curseDetector:SetNWBool("readyheal", true)
 					end
 				end)
 
-				ply:SetHealth(ply:Health() + 3)
-				ply:EmitSound("items/medshot4.wav")
+				ent:SetHealth(ent:Health() + 3)
+				ent:EmitSound("items/medshot4.wav")
 
-				if currentLevel >= 3 then
-					ply:SetArmor(ply:Armor() + 3)
-					ply:EmitSound("items/battery_pickup.wav")
+				if ent:IsPlayer() and currentLevel >= 3 then
+					ent:SetArmor(ent:Armor() + 3)
+					ent:EmitSound("items/battery_pickup.wav")
 
-					if ply:Armor() >= ply:GetMaxArmor() then
-						ply:SetArmor(ply:GetMaxArmor())
+					if ent:Armor() >= ent:GetMaxArmor() then
+						ent:SetArmor(ent:GetMaxArmor())
 					end
 				end
 
-				if ply:Health() >= ply:GetMaxHealth() then
-					ply:SetHealth(ply:GetMaxHealth())
+				if ent:Health() >= ent:GetMaxHealth() then
+					ent:SetHealth(ent:GetMaxHealth())
 				end
 			end
-
 		end)
 
 		curseDetector:CallOnRemove("cgm13_restore_cone_healing", function()
@@ -110,12 +120,13 @@ local function CreateKit(grigori)
 
 				if newLevel == 2 then
 					_PrintMessage(HUD_PRINTTALK, "Level 2 Curse Detector: Heals players while any player is near it. Every level after 2 gains faster healing.")
-					SetConeAutoHeal()
 				end
 
 				if newLevel == 3 then
 					_PrintMessage(HUD_PRINTTALK, "Level 3 Curse Detector: Each time a player gets healed, the player gains armor of the same amount.")
 				end
+
+				SetConeAutoHeal()
 
 				kit:Remove()
 				break
@@ -306,7 +317,9 @@ local function CreateEvent()
 	if GM13.Event.Memory:Get("coneLevel") == maxConeLevel then return end
 
 	if GM13.Event.Memory:Get("coneLevel") then
-		SetConeAutoHeal()
+		timer.Simple(2, function()
+			SetConeAutoHeal()
+		end)
 	end
 
 	local propsTab = {
