@@ -19,6 +19,7 @@ local function CreateProp(class, model, pos, ang, data)
     end
 end
 
+local entirePropList = {}
 local function MainEvent()
 
     local function ArePlayersNear(origin)
@@ -64,6 +65,7 @@ local function MainEvent()
         if ArePlayersNear(Vector( -5507.6, -3911.9, 262.4 )) then return end
 
         local function DataP(self) 
+            table.insert(entirePropList, self)
             timer.Simple(90, function()
                 if not self or not IsValid(self) then return end
                 GM13.Ent:FadeOut(self, 1.5, function() self:Remove()
@@ -73,6 +75,7 @@ local function MainEvent()
         end
 
         local function BoxPropData(self) 
+            table.insert(entirePropList, self)
             GM13.Ent:SetInvulnerable(self, true)
             self:Ignite(math.huge) 
             timer.Simple(90, function()
@@ -113,6 +116,7 @@ local function MainEvent()
         if ArePlayersNear(Vector( 2002.476563, 5689.349609, -145.968750 )) then return end
 
         local function DataP(self) 
+            table.insert(entirePropList, self)
             timer.Simple(90, function()
                 if not self or not IsValid(self) then return end
                 GM13.Ent:FadeOut(self, 1.5, function() self:Remove()
@@ -131,7 +135,7 @@ local function MainEvent()
 
         for id, prop in pairs(propTable) do
             CreateProp("prop_physics", prop.Model, prop.Pos, prop.Ang, prop.PData)
-            tspawn = false
+            tspawn = true
         end
     end
 
@@ -148,6 +152,7 @@ local function MainEvent()
         if ArePlayersNear(Vector( -4256.031250, 5939.968750, -82.968750 )) then return end
 
         local function DataP(self) 
+            table.insert(entirePropList, self)
             timer.Simple(90, function()
                 if not self or not IsValid(self) then return end
                 GM13.Ent:FadeOut(self, 1.5, function() self:Remove()
@@ -182,6 +187,7 @@ local function MainEvent()
         if ArePlayersNear(Vector( 1831.968750, -2150.685059, 1145.031250 )) then return end
 
         local function DataP(self) 
+            table.insert(entirePropList, self)
             timer.Simple(90, function()
                 if not self or not IsValid(self) then return end
                 GM13.Ent:FadeOut(self, 1.5, function() self:Remove()
@@ -217,6 +223,7 @@ local function MainEvent()
         if ArePlayersNear(Vector( -3215.989990, -1903.998779, 55.031250 )) then return end
 
         local function DataP(self) 
+            table.insert(entirePropList, self)
             timer.Simple(90, function()
                 if not self or not IsValid(self) then return end
                 GM13.Ent:FadeOut(self, 1.5, function() self:Remove()
@@ -226,6 +233,7 @@ local function MainEvent()
         end
 
         local function BoxPropData(self) 
+            table.insert(entirePropList, self)
             GM13.Ent:SetInvulnerable(self, true)
             self:Ignite(math.huge) 
             timer.Simple(90, function()
@@ -266,6 +274,7 @@ local function MainEvent()
         --if ArePlayersNear(Vector( -995.936340, 1230.894897, -527.968750 )) then return end
 
         local function DataP(self) 
+            table.insert(entirePropList, self)
             timer.Simple(90, function()
                 if not self or not IsValid(self) then return end
                 GM13.Ent:FadeOut(self, 1.5, function() self:Remove()
@@ -288,7 +297,7 @@ local function MainEvent()
         end
     end
 
-    local r = math.random(120,200)
+    local r = math.random(90,160)
 
     local function RandomEvent()
         local re = math.random(1,6)
@@ -307,7 +316,10 @@ local function MainEvent()
 end
 
 local function RemoveEvent()
-    timer.Remove("cgm13_researcherTraces_control") 
+    timer.Remove("cgm13_researcherTraces_control")
+    for _,props in pairs(entirePropList) do
+        GM13.Ent:FadeOut(props, 1.2, function() props:Remove() end)
+    end
 end
 
 GM13.Event:SetCall(eventName, MainEvent)
