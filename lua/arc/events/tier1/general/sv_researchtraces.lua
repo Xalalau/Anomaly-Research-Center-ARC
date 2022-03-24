@@ -307,7 +307,7 @@ local function MainEvent()
 end
 
 local function RemoveEvent()
-    timer.Remove("cgm13_researcherTraces_control")
+    timer.Remove("cgm13_researcherTraces_control") 
 end
 
 GM13.Event:SetCall(eventName, MainEvent)
