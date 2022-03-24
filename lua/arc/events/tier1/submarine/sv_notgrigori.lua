@@ -42,6 +42,8 @@ local function SetConeAutoHeal()
 			if ent:Health() == ent:GetMaxHealth() then return end
 
 			if curseDetector:GetNWBool("readyheal") then
+				curseDetector:SetNWBool("readyheal", false)
+
 				local effectdata = EffectData()
 				effectdata:SetOrigin(ent:EyePos() - Vector(0, 0, 20))
 				effectdata:SetStart(curseDetector.light:GetPos())
@@ -56,10 +58,6 @@ local function SetConeAutoHeal()
 				end)
 
 				util.Effect("ToolTracer", effectdata)
-			end
-
-			if curseDetector:GetNWBool("readyheal") then
-				curseDetector:SetNWBool("readyheal", false)
 
 				timer.Simple(2 / currentLevel, function()
 					if curseDetector:IsValid() then
@@ -318,13 +316,13 @@ local function SpawnProps(propsTab)
 end
 
 local function CreateEvent()
-	if GM13.Event.Memory:Get("coneLevel") == maxConeLevel then return end
-
 	if GM13.Event.Memory:Get("coneLevel") then
 		timer.Simple(2, function()
 			SetConeAutoHeal()
 		end)
 	end
+
+	if GM13.Event.Memory:Get("coneLevel") == maxConeLevel then return end
 
 	local propsTab = {
 		{
