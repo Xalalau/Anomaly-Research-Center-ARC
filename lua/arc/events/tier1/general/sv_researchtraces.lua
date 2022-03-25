@@ -271,7 +271,7 @@ local function MainEvent()
             
         }
 
-        --if ArePlayersNear(Vector( -995.936340, 1230.894897, -527.968750 )) then return end
+        if ArePlayersNear(Vector( -995.936340, 1230.894897, -527.968750 )) then return end
 
         local function DataP(self) 
             table.insert(entirePropList, self)
