@@ -98,14 +98,14 @@ function CGM13.Vehicle:Break(vehicle, value)
     if isOther then
         BreakOthers(vehicle)
     end
-
+    
+    GM13.Ent:SetMute(vehicle, true)
+    
     for _,sounds in pairs( vehicle:GetVar("SoundTable") ) do
         vehicle:StopSound(sounds)
     end
-
+    
     vehicle:SetNWBool("cgm13_burned_engine", true)
-    GM13.Ent:SetMute(vehicle, true)
-
 end
 
 function CGM13.Vehicle:IsBroken(vehicle)
@@ -121,9 +121,12 @@ end
 
 hook.Add("VehicleMove", "cgm13_vehicle_control", function(ply, vehicle)
     if CGM13.Vehicle:IsBroken(vehicle) then
-        vehicle:StartEngine(false)
-
-        BreakSimphys(vehicle)
+        local isOther = not vehicle.IsSimfphyscar and not vehicle.IsScar
+            
         BreakSCar(vehicle)
+        BreakSimphys(vehicle) 
+        if isOther then
+            BreakOthers(vehicle)
+        end
     end
 end)
