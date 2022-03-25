@@ -50,6 +50,16 @@ local function MainEvent()
     local garage = false
     local mirror = false
 
+    local function DataP(self) 
+        table.insert(entirePropList, self)
+        timer.Simple(120, function()
+            if not self or not IsValid(self) then return end
+            GM13.Ent:FadeOut(self, 1.5, function() self:Remove()
+                mirror = false
+            end)
+        end)
+    end
+
     local function Entrance1()
 
         if espawn == true then return end
@@ -64,26 +74,10 @@ local function MainEvent()
 
         if ArePlayersNear(Vector( -5507.6, -3911.9, 262.4 )) then return end
 
-        local function DataP(self) 
-            table.insert(entirePropList, self)
-            timer.Simple(90, function()
-                if not self or not IsValid(self) then return end
-                GM13.Ent:FadeOut(self, 1.5, function() self:Remove()
-                    espawn = false
-                end)
-            end)
-        end
-
         local function BoxPropData(self) 
-            table.insert(entirePropList, self)
             GM13.Ent:SetInvulnerable(self, true)
             self:Ignite(math.huge) 
-            timer.Simple(90, function()
-                if not self or not IsValid(self) then return end
-                GM13.Ent:FadeOut(self, 1.5, function() self:Remove()
-                    espawn = false
-                end)
-            end)
+            DataP(self) 
         end
 
         local propTable = {
@@ -115,16 +109,6 @@ local function MainEvent()
 
         if ArePlayersNear(Vector( 2002.476563, 5689.349609, -145.968750 )) then return end
 
-        local function DataP(self) 
-            table.insert(entirePropList, self)
-            timer.Simple(90, function()
-                if not self or not IsValid(self) then return end
-                GM13.Ent:FadeOut(self, 1.5, function() self:Remove()
-                    tspawn = false
-                end)
-            end)
-        end
-
         local propTable = {
             ["p1"] = {Model = tr(rJunk), Pos = posTab[1], Ang = Angle(0,0,0), PData = DataP},
             ["p2"] = {Model = tr(rJunk), Pos = posTab[2], Ang = Angle(0,0,0), PData = DataP},
@@ -151,16 +135,6 @@ local function MainEvent()
 
         if ArePlayersNear(Vector( -4256.031250, 5939.968750, -82.968750 )) then return end
 
-        local function DataP(self) 
-            table.insert(entirePropList, self)
-            timer.Simple(90, function()
-                if not self or not IsValid(self) then return end
-                GM13.Ent:FadeOut(self, 1.5, function() self:Remove()
-                    bcspawn = false
-                end)
-            end)
-        end
-
         local propTable = {
             ["p1"] = {Model = tr(rJunk), Pos = posTab[1], Ang = Angle(0,0,0), PData = DataP},
             ["p2"] = {Model = tr(rJunk), Pos = posTab[2], Ang = Angle(0,0,0), PData = DataP},
@@ -185,16 +159,6 @@ local function MainEvent()
         }
 
         if ArePlayersNear(Vector( 1831.968750, -2150.685059, 1145.031250 )) then return end
-
-        local function DataP(self) 
-            table.insert(entirePropList, self)
-            timer.Simple(90, function()
-                if not self or not IsValid(self) then return end
-                GM13.Ent:FadeOut(self, 1.5, function() self:Remove()
-                    topspawn = false
-                end)
-            end)
-        end
 
         local propTable = {
             ["p1"] = {Model = tr(rJunk), Pos = posTab[1], Ang = Angle(0,0,0), PData = DataP},
@@ -222,26 +186,10 @@ local function MainEvent()
 
         if ArePlayersNear(Vector( -3215.989990, -1903.998779, 55.031250 )) then return end
 
-        local function DataP(self) 
-            table.insert(entirePropList, self)
-            timer.Simple(90, function()
-                if not self or not IsValid(self) then return end
-                GM13.Ent:FadeOut(self, 1.5, function() self:Remove()
-                    garage = false
-                end)
-            end)
-        end
-
         local function BoxPropData(self) 
-            table.insert(entirePropList, self)
             GM13.Ent:SetInvulnerable(self, true)
             self:Ignite(math.huge) 
-            timer.Simple(90, function()
-                if not self or not IsValid(self) then return end
-                GM13.Ent:FadeOut(self, 1.5, function() self:Remove()
-                    garage = false
-                end)
-            end)
+            DataP(self)
         end
 
         local propTable = {
@@ -273,16 +221,6 @@ local function MainEvent()
 
         if ArePlayersNear(Vector( -995.936340, 1230.894897, -527.968750 )) then return end
 
-        local function DataP(self) 
-            table.insert(entirePropList, self)
-            timer.Simple(90, function()
-                if not self or not IsValid(self) then return end
-                GM13.Ent:FadeOut(self, 1.5, function() self:Remove()
-                    mirror = false
-                end)
-            end)
-        end
-
         local propTable = {
             ["p1"] = {Model = tr(rJunk), Pos = posTab[1], Ang = Angle(0,0,0), PData = DataP},
             ["p2"] = {Model = tr(rJunk), Pos = posTab[2], Ang = Angle(0,0,0), PData = DataP},
@@ -312,6 +250,7 @@ local function MainEvent()
     timer.Create("cgm13_researcherTraces_control", r, 0, function()
         RandomEvent()
     end)
+
     return true
 end
 
