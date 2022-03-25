@@ -92,11 +92,6 @@ function CGM13.Vehicle:Break(vehicle, value)
     
     local isOther = not vehicle.IsSimfphyscar and not vehicle.IsScar
 
-    if vehicle.StartEngine then
-        vehicle:StartEngine(false)
-        vehicle:SetSequence("idle")
-    end
-
     BreakSCar(vehicle)
     BreakSimphys(vehicle)
     
