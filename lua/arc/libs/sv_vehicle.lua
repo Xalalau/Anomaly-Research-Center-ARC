@@ -46,6 +46,24 @@ local function BreakSimphys(vehicle)
 
 end
 
+-- General other vehicles
+local function BreakOthers(vehicle)
+    if not vehicle or not IsValid(vehicle) or not vehicle:IsVehicle() then return end
+
+    vehicle:StartEngine(false)
+    vehicle.StartEngine = function() return end
+
+    if vehicle.TurnOn then
+        vehicle:TurnOn(false)
+        vehicle.TurnOn = function() return end
+    end
+
+    if vehicle.Think then
+        vehicle.Think = function() return end
+    end
+
+end
+
 hook.Add("OnEntityCreated", "cgm13_SetSoundTable", function(e)
     if not e:IsVehicle() then return end
     local StopSoundTable = {}
@@ -76,13 +94,9 @@ function CGM13.Vehicle:Break(vehicle, value)
 
     BreakSCar(vehicle)
     BreakSimphys(vehicle)
-
-    if vehicle.Think then
-        if not vehicle.IsScar then
-            if not vehicle.IsSimfphyscar then
-                vehicle.Think = function() return end
-            end
-        end
+    
+    if not vehicle.IsSimfphyscar and vehicle.IsScar then
+        BreakOthers(vehicle)
     end
 
     for _,sounds in pairs( vehicle:GetVar("SoundTable") ) do
