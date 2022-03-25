@@ -14,5 +14,5 @@ CGM13 = { -- Community GM13
 }
 
 hook.Add("Initialize", "arc_int", function()
-	GM13:AddBase("arc")
+	GM13:IncludeBase("arc")
 end)
