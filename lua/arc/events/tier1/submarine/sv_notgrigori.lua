@@ -1,6 +1,7 @@
 local eventName = "submarineNotGrigori"
 local debugMessage = true
 local maxConeLevel = 10
+local propsCanSpawn
 
 GM13.Event.Memory.Dependency:SetDependent(eventName, "ratmanReady")
 GM13.Event.Memory.Dependency:SetProvider(eventName, "coneLevel")
@@ -322,7 +323,7 @@ local function SpawnProps(propsTab)
 end
 
 local function CreateEvent()
-	local propsCanSpawn = true
+	propsCanSpawn = true
 	
 	if GM13.Event.Memory:Get("coneLevel") then
 		timer.Simple(2, function()
