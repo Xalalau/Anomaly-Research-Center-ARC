@@ -111,6 +111,14 @@ local function CreateKit(kitPos)
 
 		for _, ent in pairs(ents.FindInSphere(kit:LocalToWorld(Vector(0, 0, 10)), 20)) do
 			if ent:GetClass() == "gm13_sent_curse_detector" then
+				if GM13.Event.Memory:Get("coneLevel") == maxConeLevel then
+					GM13.Ent:FadeOut(kit, 0.5, function() kit:Remove() 
+						GM13.Ent:Dissolve(ent, 3) 
+					end)
+
+					return
+				end
+					
 				kit:EmitSound("items/suitchargeok1.wav")
 				
 				local oldLevel = GM13.Event.Memory:Get("coneLevel") or 1
