@@ -50,8 +50,11 @@ end
 local function BreakOthers(vehicle)
     if not vehicle or not IsValid(vehicle) or not vehicle:IsVehicle() then return end
 
-    vehicle:StartEngine(false)
-    vehicle.StartEngine = function() return end
+    if vehicle.StartEngine then
+        vehicle:StartEngine(false)
+        vehicle:SetSequence("idle")
+        vehicle.StartEngine = function() return end
+    end
 
     if vehicle.TurnOn then
         vehicle:TurnOn(false)
@@ -86,6 +89,8 @@ function CGM13.Vehicle:Break(vehicle, value)
 
     if not vehicle or not IsValid(vehicle) then return end
     if not vehicle:IsVehicle() then return end
+    
+    local isOther = not vehicle.IsSimfphyscar and not vehicle.IsScar
 
     if vehicle.StartEngine then
         vehicle:StartEngine(false)
@@ -95,7 +100,7 @@ function CGM13.Vehicle:Break(vehicle, value)
     BreakSCar(vehicle)
     BreakSimphys(vehicle)
     
-    if not vehicle.IsSimfphyscar and vehicle.IsScar then
+    if isOther then
         BreakOthers(vehicle)
     end
 
