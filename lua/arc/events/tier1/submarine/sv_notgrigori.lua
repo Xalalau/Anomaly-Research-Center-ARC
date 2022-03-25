@@ -1,6 +1,7 @@
 local eventName = "submarineNotGrigori"
 local debugMessage = true
 local maxConeLevel = 10
+local propsCanSpawn = true
 
 GM13.Event.Memory.Dependency:SetDependent(eventName, "ratmanReady")
 GM13.Event.Memory.Dependency:SetProvider(eventName, "coneLevel")
@@ -156,6 +157,8 @@ local function CheckGrigoriHealth(target, dmginfo)
 	CreateKit(grigori:GetPos())
 
 	GM13.Ent:Dissolve(grigori, 1)
+	
+	propsCanSpawn = true
 
 	return true
 end
@@ -312,6 +315,8 @@ local function SpawnProps(propsTab)
 				ConvertProp(prop, propTab)
 			end
 		end)
+		
+		propsCanSpawn = false
 	end
 end
 
