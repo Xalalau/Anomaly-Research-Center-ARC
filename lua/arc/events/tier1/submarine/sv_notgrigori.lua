@@ -203,6 +203,7 @@ local function CreateNotGrigori(theTable)
 			notMonk:SetAngles(Angle(0, 190, 0))
 			notMonk:Spawn()
 			notMonk:SetNWFloat("CustomHealth", 1000)
+			notMonk:SetHealth(1000)
 			notMonk:SetNWBool("isdead", false)
 			notMonk:Give("weapon_annabelle")
 
