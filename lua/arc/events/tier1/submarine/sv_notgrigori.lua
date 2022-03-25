@@ -1,7 +1,6 @@
 local eventName = "submarineNotGrigori"
 local debugMessage = true
 local maxConeLevel = 10
-local propsCanSpawn = true
 
 GM13.Event.Memory.Dependency:SetDependent(eventName, "ratmanReady")
 GM13.Event.Memory.Dependency:SetProvider(eventName, "coneLevel")
@@ -204,9 +203,11 @@ local function CreateNotGrigori(theTable)
 			notMonk:Spawn()
 			notMonk:SetNWFloat("CustomHealth", 1000)
 			notMonk:SetHealth(1000)
+			notMonk:SetMaxHealth(1000)
 			notMonk:SetNWBool("isdead", false)
 			notMonk:Give("weapon_annabelle")
 
+			GM13.Ent:SetInvulnerable(notMonk, true)
 			GM13.Ent:BlockPhysgun(notMonk, true)
 			GM13.Ent:BlockToolgun(notMonk, true)
 			GM13.Ent:BlockContextMenu(notMonk, true)
@@ -317,11 +318,12 @@ local function SpawnProps(propsTab)
 			end
 		end)
 		
-		propsCanSpawn = false
 	end
 end
 
 local function CreateEvent()
+	local propsCanSpawn = true
+	
 	if GM13.Event.Memory:Get("coneLevel") then
 		timer.Simple(2, function()
 			SetConeAutoHeal()
@@ -414,9 +416,12 @@ local function CreateEvent()
 			timer.Remove("gm13_cone_level_event")	
 			return
 		end
+			
+		if not propsCanSpawn then return end
 
 		if math.random(1, 100) <= 25 then
 			SpawnProps(propsTab)
+		        propsCanSpawn = false
 		end
 	end)
 
