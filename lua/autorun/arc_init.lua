@@ -4,15 +4,22 @@
 	https://github.com/Xalalau/Anomaly-Research-Center-ARC
 	https://discord.gg/97UpY3D7XB
 
-	Created by Xalalau and ARC community, 2022
+	Created by Xalalau and A.R.C. Community, 2022
 	MIT License
 ]]
 
 CGM13 = { -- Community GM13
+	name = "arc",
+	toolCategories = { 
+		"ARC Tools"
+	},
 	Vehicle = {},
-	Custom = {}
+	Custom = {},
+	Portals = {
+		portalIndex = 0
+	}
 }
 
-hook.Add("Initialize", "arc_int", function()
-	GM13:IncludeBase("arc")
+hook.Add("Initialize", CGM13.name .. "_int", function()
+	GM13:IncludeBase(CGM13)
 end)
