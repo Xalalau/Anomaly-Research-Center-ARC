@@ -10,14 +10,7 @@
 
 CGM13 = { -- Community GM13
 	name = "arc",
-	toolCategories = { 
-		"ARC Tools"
-	},
 	Vehicle = {},
-	Custom = {},
-	Portals = {
-		portalIndex = 0
-	}
 }
 
 hook.Add("Initialize", CGM13.name .. "_int", function()
