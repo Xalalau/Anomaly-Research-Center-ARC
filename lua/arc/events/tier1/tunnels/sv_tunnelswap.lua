@@ -1,4 +1,4 @@
-local eventName = "tunnelSwap"
+local eventName = "tunnelsSwap"
 
 local function CreatePortalNearSpawn()
     local portalInfo = {
@@ -24,7 +24,7 @@ local function CreatePortalNearSpawn()
         {
             vecA = Vector(1791.97, 1094.32, -303.45),
             vecB = Vector(1600.03, 1123.72, -179.98),
-            probability = 100
+            probability = 15
         }
     }
 
@@ -70,7 +70,7 @@ local function CreatePortalNearBuildingCExit()
         {
             vecA = Vector(-5281.67, 1494.35, -303.97),
             vecB = Vector(-5294.57, 1256.03, -176.79),
-            probability = 100
+            probability = 15
         }
     }
 
