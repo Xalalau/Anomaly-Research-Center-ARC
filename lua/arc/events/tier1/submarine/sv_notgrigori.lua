@@ -24,7 +24,7 @@ local function SetConeAutoHeal()
 
 		local areaMultiplier = currentLevel / 2 
 
-		CGM13.Custom:ProximityTrigger(eventName, "Touch", curseDetector, curseDetector:GetPos(), 150, 75 * areaMultiplier, function(ent)
+		GM13.Custom:CreateProximityTrigger(eventName, "Touch", curseDetector, curseDetector:GetPos(), 150, 75 * areaMultiplier, function(ent)
 			if not ent:IsPlayer() and not ent:IsNPC() then return end
 
 			if ent:IsNPC() then 
