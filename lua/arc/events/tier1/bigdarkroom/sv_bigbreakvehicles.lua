@@ -1,4 +1,4 @@
-local eventName = "bigBreakVehicles"
+local eventName = "bigDarkBreakVehicles"
 
 GM13.Event.Memory.Dependency:SetDependent(eventName, "openThePortal", "showBigDarkRoom")
 

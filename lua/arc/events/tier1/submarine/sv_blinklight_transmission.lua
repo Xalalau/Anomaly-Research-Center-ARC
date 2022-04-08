@@ -1,4 +1,4 @@
-local eventName = "transmissionFlickerLight"
+local eventName = "generalTransmissionFlickerLight"
 
 GM13.Event.Memory.Dependency:SetDependent(eventName, "ratmanReady")
 

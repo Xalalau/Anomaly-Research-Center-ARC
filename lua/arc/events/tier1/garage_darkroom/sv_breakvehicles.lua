@@ -1,4 +1,4 @@
-local eventName = "breakVehicles"
+local eventName = "garageBreakVehicles"
 
 local function CreateEvent()
     local function StartTouch(ent, chance)
