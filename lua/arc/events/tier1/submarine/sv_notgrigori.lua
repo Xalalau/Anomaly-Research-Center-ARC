@@ -179,7 +179,7 @@ local function DestroyProps(tablePos)
 	end
 end
 
-local function CreateNotGrigori(theTable)
+local function CreateNotGrigori(theTable, pos)
 	theTable:EmitSound("vo/ravenholm/madlaugh0" .. math.random(1, 4) .. ".wav")
 
 	local notMonkTaunts = {
@@ -207,7 +207,7 @@ local function CreateNotGrigori(theTable)
 
 			notMonk.cgm13_crazy_grigori = true
 			notMonk:SetColor(color_black)
-			notMonk:SetPos(Vector(2540.65, 3558.35, -167.97))
+			notMonk:SetPos(pos)
 			notMonk:SetAngles(Angle(0, 190, 0))
 			notMonk:Spawn()
 			notMonk:SetNWFloat("CustomHealth", 1000)
@@ -420,6 +420,18 @@ local function CreateEvent()
 		}
 	}
 
+	local notGrigoriPos = Vector(2540.65, 3558.35, -167.97)
+
+	local notGrigoriMaker = ents.Create("gm13_marker_npc")
+    notGrigoriMaker:Setup(eventName, "notGrigoriMaker", notGrigoriPos, notGrigoriPos + Vector(-10, -10, -10))
+
+	for _, propTab in ipairs(propsTab) do
+        for k, pos in ipairs(propTab.pos) do
+            local propMarker = ents.Create("gm13_marker_prop")
+            propMarker:Setup(eventName, eventName .. "PropMarker" .. k .. "_" .. tostring(propTab), pos)
+        end
+    end
+
 	timer.Create("gm13_cone_level_event", 60, 0, function()
 		if GM13.Event.Memory:Get("coneLevel") == maxConeLevel then
 			timer.Remove("gm13_cone_level_event")	
@@ -430,7 +442,7 @@ local function CreateEvent()
 
 		if math.random(1, 100) <= 25 then
 			SpawnProps(propsTab)
-		        propsCanSpawn = false
+		    propsCanSpawn = false
 		end
 	end)
 
@@ -474,7 +486,7 @@ local function CreateEvent()
 
 		if theTable and itemsOnTable >= 7 then
 			itemsOnTable = 0
-			CreateNotGrigori(theTable)
+			CreateNotGrigori(theTable, notGrigoriPos)
 		end
 	end
 
