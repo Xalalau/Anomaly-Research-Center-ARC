@@ -1,280 +1,198 @@
-local eventName = "generalTraces"
+local eventName = "generalResearchTraces"
 
-local function CreateProp(class, model, pos, ang, data)
-    if not isstring(model) or not isstring(class) then return nil end
-    if not isvector(pos) or not isangle(ang) then return nil end
+local function CreateProp(model, pos, ang)
+    local prop = ents.Create("prop_physics")
 
-    local p = ents.Create(class)
-
-    p:SetModel(model)
-    p:SetPos(pos)
-    p:SetAngles(ang)
-    p:Spawn()
+    prop:SetModel(model)
+    prop:SetPos(pos)
+    prop:SetAngles(ang)
+    prop:Spawn()
     
-    local phys = p:GetPhysicsObject()
-    if IsValid(phys) then phys:Wake() end
-    
-    if data and isfunction(data) then
-        data(p)
+    GM13.Event:SetGameEntity(eventName, prop)
+
+    local phys = prop:GetPhysicsObject()
+
+    if IsValid(phys) then
+        phys:Wake()
     end
+
+    return prop
 end
 
-local entirePropList = {}
 local function MainEvent()
-
-    local function ArePlayersNear(origin)
-        for _,v in pairs(ents.FindInSphere(origin, 2500)) do
-            if v:IsPlayer() then
-                return true
-            end
+    local propsTab = {
+        { -- tunnels entrace near building b
+            pos = {
+                Vector(-5507.6, -3911.9, 262.4),
+                Vector(-5502.3, -3871.7, 262.9),
+                Vector(-5472.4, -3893.4, 263.3),
+                Vector(-5469.7, -3866.9, 262.9),
+                Vector(-5443.9, -3891.1, 262.7)
+            },
+            model = {
+                "random",
+                "random",
+                "random",
+                "random",
+                "box"
+            }
+        },
+        { -- submarine room
+            pos = {
+                Vector(2002.47, 5689.34, -145.96),
+                Vector(2033.01, 5694.62, -145.96),
+                Vector(2034.34, 5669.50, -145.96),
+                Vector(2010.28, 5648.97, -145.96),
+                Vector(2000.03, 5703.96, -145.96)
+            },
+            model = {
+                "random",
+                "random",
+                "random",
+                "random",
+                "random"
+            }
+        },
+        { -- building c
+            pos = {
+                Vector(-4256.03, 5939.96, -82.96),
+                Vector(-4269.34, 5890.10, -82.96),
+                Vector(-4302.91, 5933.41, -82.96),
+                Vector(-4321.23, 5885.95, -82.96)
+            },
+            model = {
+                "random",
+                "random",
+                "random",
+                "random"
+            }
+        },
+        { -- building a
+            pos = {
+                Vector(1831.96, -2150.68, 1145.03),
+                Vector(1799.65, -2122.03, 1145.03),
+                Vector(1818.87, -2081.78, 1145.03),
+                Vector(1749.92, -2136.60, 1145.03),   
+            },
+            model = {
+                "random",
+                "random",
+                "random",
+                "random"
+            }
+        },
+        { -- garage
+            pos = {
+                Vector(-3215.98, -1903.99, 55.03),
+                Vector(-3215.96, -1829.90, 55.03),
+                Vector(-3158.19, -1847.12, 55.03),
+                Vector(-3143.70, -1903.99, 55.03),
+                Vector(-3191.64, -1881.06, 55.03)
+            },
+            model = {
+                "random",
+                "random",
+                "random",
+                "random",
+                "box"
+            }
+        },
+        { -- bunker
+            pos = {
+                Vector(-995.93, 1230.89, -527.97),
+                Vector(-972.05, 1175.99, -527.97),
+                Vector(-938.18, 1180.03, -527.97),
+                Vector(-1037.16, 1178.28, -527.97),
+                Vector(-1009.29, 1120.44, -527.97)
+            },
+            model = {
+                "random",
+                "random",
+                "random",
+                "random",
+                "random"
+            }
+        }
+    }
+    
+    for _, eventTab in ipairs(propsTab) do
+        for k, pos in ipairs(eventTab.pos) do
+            local propMarker = ents.Create("gm13_marker_prop")
+            propMarker:Setup(eventName, eventName .. "PropMarker" .. k .. "_".. tostring(eventTab), pos)
         end
-        return false
     end
 
-    local rJunk = {
+    local junkModels = {
         "models/props_junk/garbage_glassbottle002a.mdl",
-        "models/props/food_can/food_can_open.mdl",
+        "models/props_junk/garbage_metalcan002a.mdl",
         "models/props_junk/garbage_plasticbottle001a.mdl",
-        "models/props_gameplay/bottle001.mdl",
+        "models/props_junk/garbage_glassbottle001a.mdl",
         "models/props_junk/popcan01a.mdl",
         "models/props_junk/metalbucket01a.mdl",
         "models/props_lab/clipboard.mdl",
+        "models/props_junk/CinderBlock01a.mdl",
+        "models/props_wasteland/controlroom_chair001a.mdl",
+        "models/props_junk/sawblade001a.mdl",
+        "models/props_lab/kennel_physics.mdl",
+        "models/Gibs/wood_gib01e.mdl",
+        "models/Gibs/wood_gib01d.mdl",
+        "models/props_c17/tools_wrench01a.mdl",
+        "models/props_interiors/pot02a.mdl",
+        "models/props_junk/garbage_bag001a.mdl",
+        "models/props_junk/garbage_newspaper001a.mdl",
+        "models/props_junk/Shovel01a.mdl",
+        "models/props_junk/plasticbucket001a.mdl",
+        "models/props_junk/garbage_takeoutcarton001a.mdl",
+        "models/props_junk/PlasticCrate01a.mdl",
+        "models/props_junk/MetalBucket02a.mdl",
+        "models/maxofs2d/camera.mdl"
     }
+    
+    local delay = math.random(90, 160)
+    local eventFadeTime = 1.5
+    local eventMaxTime = delay - eventFadeTime - 1
 
-    local tr = table.Random
+    timer.Create("cgm13_researcherTraces_control", delay, 1, function()
+        local isVisible = false
+        local event = propsTab[math.random(#propsTab)]
 
-    local espawn = false
-    local tspawn = false
-    local bcspawn = false
-    local topspawn = false
-    local garage = false
-    local mirror = false
-
-    local function TempData(self, callback)
-        table.insert(entirePropList, self)
-        timer.Simple(120, function()
-            if not self or not IsValid(self) then return end
-            GM13.Ent:FadeOut(self, 1.5, function() self:Remove()
-                if callback and isfunction(callback) then
-                    callback()
+        for _, ply in ipairs(player.GetHumans()) do
+            for __, pos in ipairs(event.pos) do
+                if ply:VisibleVec(pos) then
+                    isVisible = true
+                    break
                 end
-            end)
-        end)
-    end
-
-    local function Entrance1()
-
-        if espawn == true then return end
-
-        local posTab = {
-            Vector( -5507.6, -3911.9, 262.4 ),
-            Vector( -5502.3, -3871.7, 262.9 ),
-            Vector( -5472.4, -3893.4, 263.3),
-            Vector( -5469.7, -3866.9, 262.9 ),
-            Vector( -5443.9, -3891.1, 262.7),
-        }
-
-        if ArePlayersNear(Vector( -5507.6, -3911.9, 262.4 )) then return end
-
-        local function DataP(self) 
-            TempData(self, function() espawn = false end)
+            end
         end
 
-        local function BoxPropData(self) 
-            GM13.Ent:SetInvulnerable(self, true)
-            self:Ignite(math.huge) 
-            DataP(self) 
+        if not isVisible then
+            for k, pos in ipairs(event.pos) do
+                local model = event.model[k]
+                local isBox = model == "box"
+                local isRandom = model == "random"
+                model = isBox and "models/props_junk/cardboard_box004a.mdl" or isRandom and junkModels[math.random(#junkModels)]
+
+                if model then
+                    local ang = Angle(0, math.random(0, 180), 0)
+                    local prop = CreateProp(model, pos, ang)
+
+                    if prop and prop:IsValid() then
+                        if isBox then
+                            GM13.Ent:SetInvulnerable(prop, true)
+                            prop:Ignite(eventMaxTime) 
+                        end
+
+                        timer.Simple(eventMaxTime, function()
+                            if not prop:IsValid() then return end
+
+                            GM13.Ent:FadeOut(prop, eventFadeTime, function()
+                                prop:Remove()
+                            end)
+                        end)
+                    end
+                end
+            end
         end
-
-        local propTable = {
-            ["p1"] = {Model = tr(rJunk), Pos = posTab[1], Ang = Angle(0,0,0), PData = DataP},
-            ["p2"] = {Model = tr(rJunk), Pos = posTab[2], Ang = Angle(0,0,0), PData = DataP},
-            ["p3"] = {Model = tr(rJunk), Pos = posTab[4], Ang = Angle(0,0,0), PData = DataP},
-            ["p4"] = {Model = tr(rJunk), Pos = posTab[5], Ang = Angle(0,0,0), PData = DataP},
-            ["p5"] = {Model = "models/props_junk/cardboard_box004a.mdl", Pos = posTab[3], Ang = Angle(0,0,0), PData = BoxPropData},
-        }
-
-        for id, prop in pairs(propTable) do
-            CreateProp("prop_physics", prop.Model, prop.Pos, prop.Ang, prop.PData)
-            espawn = true
-        end
-
-    end
-
-    local function Transmission1()
-
-        if tspawn == true then return end
-
-        local posTab = {
-            Vector( 2002.476563, 5689.349609, -145.968750 ),
-            Vector( 2033.012573, 5694.620605, -145.968750 ),
-            Vector( 2034.347046, 5669.501465, -145.968750 ),
-            Vector( 2010.280762, 5648.973633, -145.968750 ),
-            Vector( 2000.031250, 5703.968750, -145.968750 ),
-        }
-
-        if ArePlayersNear(Vector( 2002.476563, 5689.349609, -145.968750 )) then return end
-
-        local function DataP(self) 
-            TempData(self, function() tspawn = false end)
-        end
-
-        local propTable = {
-            ["p1"] = {Model = tr(rJunk), Pos = posTab[1], Ang = Angle(0,0,0), PData = DataP},
-            ["p2"] = {Model = tr(rJunk), Pos = posTab[2], Ang = Angle(0,0,0), PData = DataP},
-            ["p3"] = {Model = tr(rJunk), Pos = posTab[3], Ang = Angle(0,0,0), PData = DataP},
-            ["p4"] = {Model = tr(rJunk), Pos = posTab[4], Ang = Angle(0,0,0), PData = DataP},
-            ["p5"] = {Model = tr(rJunk), Pos = posTab[5], Ang = Angle(0,0,0), PData = DataP},
-        }
-
-        for id, prop in pairs(propTable) do
-            CreateProp("prop_physics", prop.Model, prop.Pos, prop.Ang, prop.PData)
-            tspawn = true
-        end
-    end
-
-    local function BuildingC1()
-        if bcspawn == true then return end
-
-        local posTab = {
-            Vector( -4256.031250, 5939.968750, -82.968750 ),
-            Vector( -4269.342285, 5890.105469, -82.968750 ),
-            Vector( -4302.913086, 5933.411621, -82.968750 ),
-            Vector( -4321.233398, 5885.958984, -82.968750 ),   
-        }
-
-        if ArePlayersNear(Vector( -4256.031250, 5939.968750, -82.968750 )) then return end
-
-        local function DataP(self) 
-            TempData(self, function() bcspawn = false end)
-        end
-
-        local propTable = {
-            ["p1"] = {Model = tr(rJunk), Pos = posTab[1], Ang = Angle(0,0,0), PData = DataP},
-            ["p2"] = {Model = tr(rJunk), Pos = posTab[2], Ang = Angle(0,0,0), PData = DataP},
-            ["p3"] = {Model = tr(rJunk), Pos = posTab[3], Ang = Angle(0,0,0), PData = DataP},
-            ["p4"] = {Model = tr(rJunk), Pos = posTab[4], Ang = Angle(0,0,0), PData = DataP},
-        }
-
-        for id, prop in pairs(propTable) do
-            CreateProp("prop_physics", prop.Model, prop.Pos, prop.Ang, prop.PData)
-            bcspawn = true
-        end
-    end
-
-    local function BuildingTopRoom()
-        if topspawn == true then return end
-
-        local posTab = {
-            Vector( 1831.968750, -2150.685059, 1145.031250 ),
-            Vector( 1799.658447, -2122.038086, 1145.031250 ),
-            Vector( 1818.877197, -2081.783691, 1145.031250 ),
-            Vector( 1749.920410, -2136.605957, 1145.031250 ),         
-        }
-
-        if ArePlayersNear(Vector( 1831.968750, -2150.685059, 1145.031250 )) then return end
-
-        local function DataP(self) 
-            TempData(self, function() topspawn = false end)
-        end
-
-        local propTable = {
-            ["p1"] = {Model = tr(rJunk), Pos = posTab[1], Ang = Angle(0,0,0), PData = DataP},
-            ["p2"] = {Model = tr(rJunk), Pos = posTab[2], Ang = Angle(0,0,0), PData = DataP},
-            ["p3"] = {Model = tr(rJunk), Pos = posTab[3], Ang = Angle(0,0,0), PData = DataP},
-            ["p4"] = {Model = tr(rJunk), Pos = posTab[4], Ang = Angle(0,0,0), PData = DataP},
-        }
-
-        for id, prop in pairs(propTable) do
-            CreateProp("prop_physics", prop.Model, prop.Pos, prop.Ang, prop.PData)
-            topspawn = true
-        end
-    end
-
-    local function Garage()
-        if garage == true then return end
-
-        local posTab = {
-            Vector( -3215.989990, -1903.998779, 55.031250 ),
-            Vector( -3215.968750, -1829.901611, 55.031250 ),
-            Vector( -3158.192871, -1847.123779, 55.031250 ),
-            Vector( -3143.700684, -1903.998779, 55.031250 ),
-            Vector(-3191.642822, -1881.062134, 55.031250),
-        }
-
-        if ArePlayersNear(Vector( -3215.989990, -1903.998779, 55.031250 )) then return end
-
-        local function DataP(self) 
-            TempData(self, function() garage = false end)
-        end
-
-        local function BoxPropData(self) 
-            GM13.Ent:SetInvulnerable(self, true)
-            self:Ignite(math.huge) 
-            DataP(self)
-        end
-
-        local propTable = {
-            ["p1"] = {Model = tr(rJunk), Pos = posTab[1], Ang = Angle(0,0,0), PData = DataP},
-            ["p2"] = {Model = tr(rJunk), Pos = posTab[2], Ang = Angle(0,0,0), PData = DataP},
-            ["p3"] = {Model = tr(rJunk), Pos = posTab[3], Ang = Angle(0,0,0), PData = DataP},
-            ["p4"] = {Model = tr(rJunk), Pos = posTab[4], Ang = Angle(0,0,0), PData = DataP},
-            ["p5"] = {Model = "models/props_junk/cardboard_box004a.mdl", Pos = posTab[5], Ang = Angle(0,0,0), PData = BoxPropData},
-        }
-
-        for id, prop in pairs(propTable) do
-            CreateProp("prop_physics", prop.Model, prop.Pos, prop.Ang, prop.PData)
-            garage = true
-        end
-    end
-
-    local function MirrorRoom()
-
-        if mirror == true then return end
-
-        local posTab = {
-            Vector( -995.936340, 1230.894897, -527.968750 ),
-            Vector( -972.057312, 1175.997192, -527.968750 ),
-            Vector( -938.189880, 1180.032715, -527.968750 ),
-            Vector( -1037.165161, 1178.285767, -527.968750 ),
-            Vector( -1009.298950, 1120.444702, -527.968750 ),
-            
-        }
-
-        if ArePlayersNear(Vector( -995.936340, 1230.894897, -527.968750 )) then return end
-
-        local function DataP(self) 
-            TempData(self, function() mirror = false end)
-        end
-
-        local propTable = {
-            ["p1"] = {Model = tr(rJunk), Pos = posTab[1], Ang = Angle(0,0,0), PData = DataP},
-            ["p2"] = {Model = tr(rJunk), Pos = posTab[2], Ang = Angle(0,0,0), PData = DataP},
-            ["p3"] = {Model = tr(rJunk), Pos = posTab[3], Ang = Angle(0,0,0), PData = DataP},
-            ["p4"] = {Model = tr(rJunk), Pos = posTab[4], Ang = Angle(0,0,0), PData = DataP},
-            ["p5"] = {Model = tr(rJunk), Pos = posTab[5], Ang = Angle(0,0,0), PData = DataP},
-        }
-
-        for id, prop in pairs(propTable) do
-            mirror = true
-            CreateProp("prop_physics", prop.Model, prop.Pos, prop.Ang, prop.PData)
-        end
-    end
-
-    local r = math.random(90,160)
-
-    local function RandomEvent()
-        local re = math.random(1,6)
-        if re == 1 then BuildingC1()
-        elseif re == 2 then Transmission1() 
-        elseif re == 3 then Entrance1() 
-        elseif re == 4 then BuildingTopRoom() 
-        elseif re == 5 then Garage() 
-        elseif re == 6 then MirrorRoom() end
-    end
-
-    timer.Create("cgm13_researcherTraces_control", r, 0, function()
-        RandomEvent()
     end)
 
     return true
@@ -282,9 +200,6 @@ end
 
 local function RemoveEvent()
     timer.Remove("cgm13_researcherTraces_control")
-    for _,props in pairs(entirePropList) do
-        GM13.Ent:FadeOut(props, 1.2, function() props:Remove() end)
-    end
 end
 
 GM13.Event:SetCall(eventName, MainEvent)
