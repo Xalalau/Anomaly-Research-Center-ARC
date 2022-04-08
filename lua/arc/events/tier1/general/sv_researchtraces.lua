@@ -153,42 +153,44 @@ local function MainEvent()
     local eventMaxTime = delay - eventFadeTime - 1
 
     timer.Create("cgm13_researcherTraces_control", delay, 1, function()
-        local isVisible = false
-        local event = propsTab[math.random(#propsTab)]
+		if math.random(1, 100) <= 37 then
+            local isVisible = false
+            local event = propsTab[math.random(#propsTab)]
 
-        for _, ply in ipairs(player.GetHumans()) do
-            for __, pos in ipairs(event.pos) do
-                if ply:VisibleVec(pos) then
-                    isVisible = true
-                    break
+            for _, ply in ipairs(player.GetHumans()) do
+                for __, pos in ipairs(event.pos) do
+                    if ply:VisibleVec(pos) then
+                        isVisible = true
+                        break
+                    end
                 end
             end
-        end
 
-        if not isVisible then
-            for k, pos in ipairs(event.pos) do
-                local model = event.model[k]
-                local isBox = model == "box"
-                local isRandom = model == "random"
-                model = isBox and "models/props_junk/cardboard_box004a.mdl" or isRandom and junkModels[math.random(#junkModels)]
+            if not isVisible then
+                for k, pos in ipairs(event.pos) do
+                    local model = event.model[k]
+                    local isBox = model == "box"
+                    local isRandom = model == "random"
+                    model = isBox and "models/props_junk/cardboard_box004a.mdl" or isRandom and junkModels[math.random(#junkModels)]
 
-                if model then
-                    local ang = Angle(0, math.random(0, 180), 0)
-                    local prop = CreateProp(model, pos, ang)
+                    if model then
+                        local ang = Angle(0, math.random(0, 180), 0)
+                        local prop = CreateProp(model, pos, ang)
 
-                    if prop and prop:IsValid() then
-                        if isBox then
-                            GM13.Ent:SetInvulnerable(prop, true)
-                            prop:Ignite(eventMaxTime) 
-                        end
+                        if prop and prop:IsValid() then
+                            if isBox then
+                                GM13.Ent:SetInvulnerable(prop, true)
+                                prop:Ignite(eventMaxTime) 
+                            end
 
-                        timer.Simple(eventMaxTime, function()
-                            if not prop:IsValid() then return end
+                            timer.Simple(eventMaxTime, function()
+                                if not prop:IsValid() then return end
 
-                            GM13.Ent:FadeOut(prop, eventFadeTime, function()
-                                prop:Remove()
+                                GM13.Ent:FadeOut(prop, eventFadeTime, function()
+                                    prop:Remove()
+                                end)
                             end)
-                        end)
+                        end
                     end
                 end
             end
