@@ -1,53 +1,7 @@
-
 -- Break vehicles (By Zaurzo)
 
--- SCars
--- https://steamcommunity.com/sharedfiles/filedetails/?id=104483020
-local function BreakSCar(vehicle)
-    if not vehicle or not IsValid(vehicle) or not vehicle:IsVehicle() then return end
-    if not vehicle.IsScar then return end
-
-    if vehicle.TurnOffCar then
-        vehicle:TurnOffCar()
-    end
-
-    if vehicle.StartCar then 
-        vehicle.StartCar = function() return end
-    end
-
-    if vehicle.TurnLeft or vehicle.TurnRight then
-        vehicle.TurnLeft = function() return end
-        vehicle.TurnRight = function() return end
-    end
-
-end
-
--- Simphys
--- https://steamcommunity.com/workshop/filedetails/?id=771487490
-local function BreakSimphys(vehicle)
-    if not vehicle or not IsValid(vehicle) or not vehicle:IsVehicle() then return end
-    if not vehicle.IsSimfphyscar then return end
-
-    if vehicle.StopEngine then
-        vehicle:StopEngine()
-    end
-
-    if vehicle.SetValues then
-        vehicle:SetValues()
-    end
-
-    if vehicle.StartEngine then 
-        vehicle.StartEngine = function() return end 
-    end
-
-    if vehicle.SetActive then
-        vehicle.SetActive = function() return end
-    end
-
-end
-
--- General other vehicles
-local function BreakOthers(vehicle)
+-- Default HL2 based vehicles
+function CGM13.Vehicle:BreakHL2Vehicle(vehicle)
     if not vehicle or not IsValid(vehicle) or not vehicle:IsVehicle() then return end
 
     if vehicle.StartEngine then
@@ -64,69 +18,70 @@ local function BreakOthers(vehicle)
     if vehicle.Think then
         vehicle.Think = function() return end
     end
-
-end
-
-hook.Add("OnEntityCreated", "cgm13_SetSoundTable", function(e)
-    if not e:IsVehicle() then return end
-    local StopSoundTable = {}
-    e:SetVar("SoundTable", StopSoundTable)
-end)
--- Add the sound list table to stop later
-
-hook.Add("EntityEmitSound", "cgm13_GetSCarSoundList", function(d)
-    if not d.Entity or not IsValid(d.Entity) then return end
-    if not d.Entity:IsVehicle() then return end
-    local e = d.Entity
-    local SoundList = e:GetVar("SoundTable")
-    table.insert(SoundList, d.SoundName)
-    e:SetVar("SoundTable", SoundList)
-end)
--- Some vehicle engine sounds don't stop upon engine break
--- So we add it to a table and stop the sound when necessary
-
-function CGM13.Vehicle:Break(vehicle, value)
-
-    if not vehicle or not IsValid(vehicle) then return end
-    if not vehicle:IsVehicle() then return end
-    
-    local isOther = not vehicle.IsSimfphyscar and not vehicle.IsScar
-
-    BreakSCar(vehicle)
-    BreakSimphys(vehicle)
-    
-    if isOther then
-        BreakOthers(vehicle)
-    end
-    
-    GM13.Ent:SetMute(vehicle, true)
-    
-    for _,sounds in pairs( vehicle:GetVar("SoundTable") ) do
-        vehicle:StopSound(sounds)
-    end
-    
-    vehicle:SetNWBool("cgm13_burned_engine", true)
 end
 
 function CGM13.Vehicle:IsBroken(vehicle)
     return vehicle:GetNWBool("cgm13_burned_engine")
 end
 
+-- Break any supported vehicle
+function CGM13.Vehicle:Break(vehicle, value)
+    if not vehicle or not IsValid(vehicle) or not vehicle:IsVehicle() then return end
+
+    if vehicle.IsSimfphyscar then
+        CGM13.addon:BreakSimphys(vehicle)
+    elseif vehicle.IsScar then
+        CGM13.addon:BreakSCar(vehicle)    
+    else
+        CGM13.Vehicle:BreakHL2Vehicle(vehicle)
+    end
+
+    GM13.Ent:SetMute(vehicle, true)
+    
+    local soundTable = vehicle:GetVar("SoundTable")
+
+    for _,sounds in pairs(soundTable) do
+        vehicle:StopSound(sounds)
+    end
+
+    vehicle:SetNWBool("cgm13_burned_engine", true)
+end
+
+-- Some vehicle engine sounds don't stop upon engine break
+-- So we add it to a table and stop the sound when necessary
+hook.Add("OnEntityCreated", "cgm13_SetSoundTable", function(e)
+    if not e:IsVehicle() then return end
+    local StopSoundTable = {}
+    e:SetVar("SoundTable", StopSoundTable)
+end)
+
+hook.Add("EntityEmitSound", "cgm13_GetSCarSoundList", function(data)
+    if not data.Entity:IsVehicle() then return end
+
+    local ent = data.Entity
+    local soundList = ent:GetVar("SoundTable")
+
+    table.insert(soundList, data.SoundName)
+    ent:SetVar("SoundTable", soundList)
+end)
+
+-- Detour ENT.SetNWBool to block attempts to use broken vehicles
 local ENT = FindMetaTable("Entity")
 local SetNWBool = ENT.SetNWBool
 ENT.SetNWBool = function(self, value, ...)
-    if CGM13.Vehicle:IsBroken(self) and value == "cgm13_burned_engine" then return end
+    if self:IsVehicle() and CGM13.Vehicle:IsBroken(self) then return end
     return SetNWBool(self, value, ...)
 end
 
+-- Keep vehicles broken
 hook.Add("VehicleMove", "cgm13_vehicle_control", function(ply, vehicle)
     if CGM13.Vehicle:IsBroken(vehicle) then
-        local isOther = not vehicle.IsSimfphyscar and not vehicle.IsScar
-            
-        BreakSCar(vehicle)
-        BreakSimphys(vehicle) 
-        if isOther then
-            BreakOthers(vehicle)
+        if vehicle.IsSimfphyscar then
+            CGM13.addon:BreakSimphys(vehicle)
+        elseif vehicle.IsScar then
+            CGM13.addon:BreakSCar(vehicle)    
+        else
+            CGM13.Vehicle:BreakHL2Vehicle(vehicle)
         end
     end
 end)

@@ -11,6 +11,7 @@
 CGM13 = { -- Community GM13
 	name = "arc",
 	Vehicle = {},
+	Addon = {}
 }
 
 hook.Add("Initialize", CGM13.name .. "_int", function()
