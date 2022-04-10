@@ -100,6 +100,7 @@ local function CreateKit(kitPos)
 	kit:SetModel("models/weapons/w_package.mdl")
 	kit:SetPos(kitPos + Vector(0, 0, 10))
 	kit:Spawn()
+	GM13.Ent:SetCursed(kit, true)
 
 	local timerName = "cgm13_upgradekit_check_" .. tostring(kit)
 
@@ -222,6 +223,7 @@ local function CreateNotGrigori(theTable, pos)
 			GM13.Ent:BlockContextMenu(notMonk, true)
 			GM13.NPC:AttackClosestPlayer(notMonk)
 			GM13.Ent:SetDamageCallback(notMonk, CheckGrigoriHealth)
+			GM13.Ent:SetCursed(notMon, true)
 
 			for _, ply in ipairs(player.GetHumans()) do
 				ply:GodDisable()
@@ -312,6 +314,8 @@ local function SpawnProps(propsTab)
 		prop:SetName("zprop_GM13" .. k)
 		prop:SetVar("ready_for_hit_zprop", true)
 		
+		GM13.Ent:SetCursed(prop, true)
+
 		local physObj = prop:GetPhysicsObject()
 		
 		if IsValid(physObj) then
