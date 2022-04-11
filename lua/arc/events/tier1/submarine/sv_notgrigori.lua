@@ -46,7 +46,7 @@ local function SetConeAutoHeal()
 				curseDetector:SetNWBool("readyheal", false)
 
 				local effectdata = EffectData()
-				effectdata:SetOrigin(ent:EyePos() - Vector(0, 0, 20))
+				effectdata:SetOrigin(ent:EyePos() - Vector(0, 0, 5))
 				effectdata:SetStart(curseDetector.light:GetPos())
 
 				curseDetector.light:SetColor(Color(47, 225, 237, 255))
