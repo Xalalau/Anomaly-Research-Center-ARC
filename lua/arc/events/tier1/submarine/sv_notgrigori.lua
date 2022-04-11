@@ -172,16 +172,18 @@ local function CheckGrigoriHealth(target, dmginfo)
 	return true
 end
 
-local function DestroyProps(tablePos)
-	for _, ent in pairs(ents.FindInBox(tablePos + Vector(250, 250, 250), tablePos + Vector(-250, -250, -250))) do
-		if ent:GetNWBool("ritualprop") then
-			GM13.Ent:Dissolve(ent, 2)
-		end
+local function DestroyProps()
+	for _, prop in ipairs(ents.FindByName("gm13_not_grigori_converted_prop")) do
+		GM13.Ent:Dissolve(prop, 2)
+	end
+
+	for _, prop in ipairs(ents.FindByName("gm13_not_grigori_prop")) do
+		GM13.Ent:Dissolve(prop, 2)
 	end
 end
 
-local function CreateNotGrigori(theTable, pos)
-	theTable:EmitSound("vo/ravenholm/madlaugh0" .. math.random(1, 4) .. ".wav")
+local function CreateNotGrigori(ratmansTable, pos)
+	ratmansTable:EmitSound("vo/ravenholm/madlaugh0" .. math.random(1, 4) .. ".wav")
 
 	local notMonkTaunts = {
 		"vo/ravenholm/engage04.wav",
@@ -197,13 +199,13 @@ local function CreateNotGrigori(theTable, pos)
 	}
 
 	timer.Simple(5, function()
-		if theTable:IsValid() then
-			theTable:EmitSound(notMonkTaunts[math.random(1, #notMonkTaunts)])
+		if ratmansTable:IsValid() then
+			ratmansTable:EmitSound(notMonkTaunts[math.random(1, #notMonkTaunts)])
 		end
 	end)
 
 	timer.Simple(7, function()
-		if theTable:IsValid() then
+		if ratmansTable:IsValid() then
 			local notMonk = ents.Create("npc_monk")
 
 			notMonk.cgm13_crazy_grigori = true
@@ -245,15 +247,11 @@ local function CreateNotGrigori(theTable, pos)
 		end
 	end)
 
-	local tablePos = theTable:GetPos()
-
 	timer.Simple(1, function()
-		DestroyProps(tablePos)
-
-		if theTable:IsValid() then
-			GM13.Ent:BlockPhysgun(theTable, false)
-			GM13.Ent:BlockToolgun(theTable, false)
-			GM13.Ent:BlockContextMenu(theTable, false)
+		if ratmansTable:IsValid() then
+			GM13.Ent:BlockPhysgun(ratmansTable, false)
+			GM13.Ent:BlockToolgun(ratmansTable, false)
+			GM13.Ent:BlockContextMenu(ratmansTable, false)
 		end
 	end)
 end
@@ -263,7 +261,7 @@ local function ConvertProp(prop, propTab)
 	
 	GM13.Ent:FadeOut(prop, 1.5, function()
 		local convertedProp = ents.Create("prop_physics")
-		convertedProp:SetName("converted_prop_gm13_" .. propTab.conversion.model)
+		convertedProp:SetName("gm13_not_grigori_converted_prop")
 		convertedProp:SetNWBool("ritualprop", true)
 		convertedProp:SetModel(propTab.conversion.model)
 		convertedProp:SetPos(prop:GetPos() + Vector(0,0,10))
@@ -311,7 +309,7 @@ local function SpawnProps(propsTab)
 		prop:SetSolid(SOLID_VPHYSICS)
 		prop:SetMaxHealth(1)
 		prop:SetHealth(1)
-		prop:SetName("zprop_GM13" .. k)
+		prop:SetName("gm13_not_grigori_prop")
 		prop:SetVar("ready_for_hit_zprop", true)
 		
 		GM13.Ent:SetCursed(prop, true)
@@ -436,6 +434,8 @@ local function CreateEvent()
         end
     end
 
+	local ratmansTable
+
 	timer.Create("gm13_cone_level_event", 60, 0, function()
 		if GM13.Event.Memory:Get("coneLevel") == maxConeLevel then
 			timer.Remove("gm13_cone_level_event")	
@@ -445,38 +445,31 @@ local function CreateEvent()
 		if not propsCanSpawn then return end
 
 		if math.random(1, 100) <= 25 then
-			SpawnProps(propsTab)
-		    propsCanSpawn = false
+			ratmansTable = ents.FindByName("ratman_table")[1]
+
+			if ratmansTable then
+				SpawnProps(propsTab)
+				propsCanSpawn = false
+
+				ratmansTable:SetMoveType(MOVETYPE_NONE)
+				ratmansTable:SetNotSolid(true)
+				GM13.Ent:BlockPhysgun(ratmansTable, true)
+				GM13.Ent:BlockToolgun(ratmansTable, true)
+				GM13.Ent:BlockContextMenu(ratmansTable, true)
+				GM13.Prop:CallOnBreak(ratmansTable, "ratman_table", function()
+					DestroyProps()
+				end)
+			end
 		end
 	end)
 
     local itemCheckTrigger = ents.Create("gm13_trigger")
     itemCheckTrigger:Setup(eventName, "itemCheckTrigger", Vector(2388.6, 3654.7, -79), Vector(2188.6, 3454.7, -167.9))
 
-	local tablePos
 	local itemsOnTable = 0
-	local theTable
 	function itemCheckTrigger:StartTouch(ent)
 		if not ent:GetNWBool("ritualprop") then return end
 		if GM13.Event.Memory:Get("coneLevel") == maxConeLevel then return end
-
-		if not theTable or not theTable:IsValid() then
-			theTable = ents.FindByName("ratman_table")[1]
-		end
-
-		if theTable and not tablePos then
-			dollPosTabCopy = table.Copy(dollPosTab)
-			tablePos = theTable:GetPos()
-			theTable:SetMoveType(MOVETYPE_NONE)
-			theTable:SetNotSolid(true)
-			GM13.Ent:BlockPhysgun(theTable, true)
-			GM13.Ent:BlockToolgun(theTable, true)
-			GM13.Ent:BlockContextMenu(theTable, true)
-			GM13.Prop:CallOnBreak(theTable, "ratman_table", function()
-				DestroyProps(tablePos)
-				tablePos = nil
-			end)
-		end
 
 		ent:SetAngles(Angle(0,0,0))
 		ent:SetMoveType(MOVETYPE_NONE)
@@ -488,9 +481,9 @@ local function CreateEvent()
 		itemsOnTable = itemsOnTable + 1
 		ent:EmitSound("physics/metal/metal_solid_impact_hard4.wav")
 
-		if theTable and itemsOnTable >= 7 then
+		if ratmansTable and itemsOnTable >= 7 then
 			itemsOnTable = 0
-			CreateNotGrigori(theTable, notGrigoriPos)
+			CreateNotGrigori(ratmansTable, notGrigoriPos)
 		end
 	end
 
