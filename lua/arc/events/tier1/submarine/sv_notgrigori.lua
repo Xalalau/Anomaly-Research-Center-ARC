@@ -1,6 +1,6 @@
 local eventName = "submarineNotGrigori"
-local debugMessage = true
-local maxConeLevel = 10
+local debugMessage = false
+local maxConeLevel = 4
 local propsCanSpawn
 
 GM13.Event.Memory.Dependency:SetDependent(eventName, "ratmanReady")
@@ -22,9 +22,9 @@ local function SetConeAutoHeal()
 
 		if not currentLevel then return end
 
-		local areaMultiplier = currentLevel / 2 
+		local areaMultiplier = currentLevel / 1.5
 
-		GM13.Custom:CreateProximityTrigger(eventName, "Touch", curseDetector, curseDetector:GetPos(), 150, 75 * areaMultiplier, function(ent)
+		GM13.Custom:CreateProximityTrigger(eventName, "Touch", curseDetector, curseDetector:GetPos(), 150, 150 * areaMultiplier, function(ent)
 			if not ent:IsPlayer() and not ent:IsNPC() then return end
 
 			if ent:IsNPC() then 
@@ -60,7 +60,7 @@ local function SetConeAutoHeal()
 
 				util.Effect("ToolTracer", effectdata)
 
-				timer.Simple(2 / currentLevel, function()
+				timer.Simple(2 / (currentLevel * 1.6), function()
 					if curseDetector:IsValid() then
 						curseDetector:SetNWBool("readyheal", true)
 					end
