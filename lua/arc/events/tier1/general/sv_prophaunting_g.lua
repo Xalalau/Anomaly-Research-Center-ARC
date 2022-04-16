@@ -1,96 +1,78 @@
 local eventName = "generalHauntedProps"
 
 local commonMaps = {
-    ["gm_supermarket"] = true
+    ["gm_supermarket"] = true,
+    ["rp_hometown2000"] = true
 }
 
 local function ClassInSphere(class, origin, dist)
     local foundEnts = {}
 
-    for k,v in pairs(ents.FindInSphere(origin, dist)) do
-        if v:GetClass() == class and not v.gm13_player_prop then 
-            table.insert(foundEnts, v) 
+    for k, ent in ipairs(ents.FindInSphere(origin, dist)) do
+        if ent:GetClass() == class and not GM13.Ent:IsPlayersProp(ent) then 
+            table.insert(foundEnts, ent) 
         end
     end
 
     return foundEnts
 end
 
-local function IsValidPhysicsObject(physobj)
-    return TypeID(physobj) == TYPE_PHYSOBJ and physobj:IsValid()
-end
-
-local function ResizePhysics(ent, scale)
-    ent:PhysicsInit(SOLID_VPHYSICS)
-
-    local physObj = ent:GetPhysicsObject()
-
-    if not IsValidPhysicsObject(physObj) then return false end
-
-    local physMesh = physObj:GetMeshConvexes()
-
-    if not istable(physMesh) or #physMesh < 1 then return false end
-
-    for convexKey, convex in pairs(physMesh) do
-        for posKey, posTab in pairs(convex) do
-            convex[posKey] = posTab.pos * scale
-        end
-    end
-
-    ent:PhysicsInitMultiConvex(physMesh)
-    ent:EnableCustomCollisions(true)
-
-    return IsValidPhysicsObject(ent:GetPhysicsObject())
-end
-
-local function ScaleProp(prop, scale)
-    for i=0, prop:GetBoneCount() do
-        prop:ManipulateBoneScale(i, Vector(1,1,1) * scale)
-    end
-    ResizePhysics(prop, scale)
-    prop:GetPhysicsObject():SetVelocity(Vector(0,0,0))
-end
-
 local function CreateEvent()
-
     local totalProps = 0
     for k, ent in ipairs(ents.GetAll()) do
         if ent:GetClass() == "prop_physics" then
             totalProps = totalProps + 1
         end
     end
-    
-    local delay = totalProps > 200 and 200 or totalProps > 100 and 300 or 400
-    local chance = (commonMaps[game.GetMap()] or ISGM13) and 6 or 3
-    
+
+    local chance = commonMaps[game.GetMap()] and 5 or
+                   totalProps > 200 and 3   or totalProps > 100 and 2   or 1
+    local delay =  totalProps > 200 and 60 or totalProps > 100 and 300 or 400
+
     timer.Create("gm13_haunted_prop_control", delay, 0, function()
-        if totalProps == 0 or ( math.random(1, 100) > chance ) then return end
+        if totalProps == 0 then 
+            timer.Remove("gm13_haunted_prop_control")
+            return
+        end
 
-        for i = 1, #player.GetHumans() do
-            local ply = player.GetHumans()[i]
-            local props = ClassInSphere("prop_physics", ply:GetPos(), 250)
-            local mode = math.random(1, 2)
+        if math.random(1, 100) <= chance then
+            for k, ply in ipairs(player.GetHumans()) do
+                local props = ClassInSphere("prop_physics", ply:GetPos(), 3000)
+                local mode = math.random(1, 3)
 
-            local rProp = props[math.random(#props)]
-            if IsValid(rProp) then
-                if mode == 1 then
-                    -- Drop Props
+                if #props == 0 then return end
 
-                    local obj = rProp:GetPhysicsObject() or rProp
+                local selectedPropIndex = math.random(#props)
+                local selectedProp = props[selectedPropIndex]
+                if IsValid(selectedProp) then
+                    if mode == 1 then
+                        -- Drop Props
 
-                    local originalMass = obj:GetMass()
-                    local force = rProp:GetForward() * 500
-                    force:Rotate(Angle(math.random(-35, 35), math.random(0, 360), 0))
-                
-                    obj:SetMass(5)
-                    obj:ApplyForceCenter(force)
-                    obj:SetMass(originalMass)
-                elseif mode == 2 then
-                    -- Scale Props
+                        local obj = selectedProp:GetPhysicsObject() or selectedProp
 
-                    local rChance = math.random(1, 2)
-                    local scale = ( rChance == 1 and 1.15 ) or 0.85
-                    ScaleProp(rProp, scale)
+                        local originalMass = obj:GetMass()
+                        local force = selectedProp:GetForward() * 800
+                        force:Rotate(Angle(math.random(-35, 35), math.random(0, 360), 0))
+                    
+                        obj:SetMass(5)
+                        obj:ApplyForceCenter(force)
+                        obj:SetMass(originalMass)
+                    elseif mode == 2 then
+                        -- Scale Props
+
+                        local rChance = math.random(1, 2)
+                        local scale = (rChance == 1 and 1.3) or 0.70
+                        GM13.Ent:Resize(selectedProp, scale)
+                    elseif mode == 3 then
+                        -- Swap Props
+
+                        props[selectedPropIndex] = nil
+                        local secondProp = props[math.random(#props)]
+                        local secondPropPos = secondProp:GetPos()
+
+                        secondProp:SetPos(selectedProp:GetPos())
+                        selectedProp:SetPos(secondPropPos)
+                    end
                 end
             end
         end
