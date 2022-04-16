@@ -11,7 +11,7 @@ local function CreateEvent()
 
                 local timerName = "gm13_wall_hole_light_flicker" .. tostring(sprite)
 
-                timer.Create(timerName, 60, 0, function()
+                timer.Create(timerName, 30, 0, function()
                     if not sprite:IsValid() then
                         timer.Remove(timerName)
                         return
