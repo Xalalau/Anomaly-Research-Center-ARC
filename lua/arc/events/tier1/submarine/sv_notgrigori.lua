@@ -182,6 +182,75 @@ local function DestroyProps()
 	end
 end
 
+local function SetGregoriLv2Power(notMonk)
+	timer.Create("gm13_notgrigori_lvl_2", 0.4, 0, function()
+		if not notMonk:IsValid() then
+			timer.Remove("gm13_notgrigori_lvl_2")
+			return
+		end
+
+		local manhack = ents.Create("npc_manhack")
+		manhack:SetPos(notMonk:GetPos() + notMonk:GetForward() * 35)
+		manhack:SetRenderFX(kRenderFxHologram)
+		manhack:Spawn()
+		manhack:Activate()
+		manhack:AddEntityRelationship(notMonk, D_LI, 99)
+	end)
+end
+
+-- Thanks, Meteor Shower
+-- https://steamcommunity.com/sharedfiles/filedetails/?id=138376105
+local function SetGregoriLv3Power(notMonk)
+	timer.Create("gm13_notgrigori_lvl_3", 0.6, 10, function()
+		if not notMonk:IsValid() then
+			timer.Remove("gm13_notgrigori_lvl_3")
+			return
+		end
+
+		local damage = 25
+		local magnitude = 200
+		local force = notMonk:GetForward() * 60000
+		local forceAngle = Angle(math.random(-45, 10), math.random(0, 360), 0)
+		force:Rotate(forceAngle)
+
+		local meteor = ents.Create("prop_physics")
+		meteor:SetModel("models/props_phx/mk-82.mdl")
+		meteor:SetAngles(forceAngle)
+		meteor:PhysicsInit(SOLID_VPHYSICS)
+		meteor:SetMoveType(MOVETYPE_VPHYSICS)
+		meteor:SetSolid(SOLID_VPHYSICS)
+		meteor:SetPos(notMonk:GetPos() + Vector(0, 0, 75))
+		meteor:Spawn()
+		meteor:Activate()
+
+		local phys = meteor:GetPhysicsObject()
+		if phys:IsValid() then
+			phys:Wake()
+
+			phys:SetMass(10)
+			phys:ApplyForceCenter(force)
+		end
+
+		local trail = ents.Create("env_fire_trail")
+		trail:SetPos(meteor:GetPos())
+		trail:SetParent(meteor)
+		trail:Spawn()
+		trail:Activate()
+		
+		meteor:AddCallback("PhysicsCollide", function()
+			local pos = meteor:GetPos()
+			local scale = magnitude / 100.0
+			local effectData = EffectData()
+			effectData:SetStart(pos)
+			effectData:SetOrigin(pos)
+			effectData:SetScale(scale)
+			util.Effect("meteor_explosion", effectData) 
+			util.BlastDamage(meteor, meteor, pos, magnitude, damage)
+			meteor:EmitSound("ambient/explosions/explode_4.wav", 90 * scale, 100)
+		end)
+	end)
+end
+
 local function CreateNotGrigori(ratmansTable, pos)
 	ratmansTable:EmitSound("vo/ravenholm/madlaugh0" .. math.random(1, 4) .. ".wav")
 
@@ -244,6 +313,16 @@ local function CreateNotGrigori(ratmansTable, pos)
 			end
 
 			notMonk:GetActiveWeapon():SetClip1(50000)
+
+			local coneLevel = GM13.Event.Memory:Get("coneLevel")
+
+			if coneLevel >= 2 then
+				SetGregoriLv2Power(notMonk)
+			end
+
+			if coneLevel >= 3 then
+				SetGregoriLv3Power(notMonk)
+			end
 		end
 	end)
 
