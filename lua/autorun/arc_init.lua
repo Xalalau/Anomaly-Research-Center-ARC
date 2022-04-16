@@ -14,6 +14,6 @@ CGM13 = { -- Community GM13
 	Addon = {}
 }
 
-hook.Add("Initialize", CGM13.name .. "_int", function()
+hook.Add("Initialize", CGM13.name .. "_init", function()
 	GM13:IncludeBase(CGM13)
 end)
