@@ -3,7 +3,7 @@ local debugMessage = false
 local maxConeLevel = 4
 local propsCanSpawn
 
-GM13.Event.Memory.Dependency:SetDependent(eventName, "ratmanReady")
+GM13.Event.Memory.Dependency:SetDependent(eventName, "ratmanReady", "savedCitizen")
 GM13.Event.Memory.Dependency:SetProvider(eventName, "coneLevel")
 
 local function _PrintMessage(messageType, message)
@@ -18,7 +18,7 @@ local function SetConeAutoHeal()
 	if curseDetector then
 		curseDetector:SetNWBool("readyheal", true)
 
-		local currentLevel = GM13.Event.Memory:Get("coneLevel")
+		local currentLevel = GM13.Event.Memory:Get("coneLevel") or 1
 
 		if not currentLevel then return end
 
@@ -183,7 +183,7 @@ local function DestroyProps()
 end
 
 local function SetGregoriLv2Power(notMonk)
-	timer.Create("gm13_notgrigori_lvl_2", 0.4, 0, function()
+	timer.Create("gm13_notgrigori_lvl_2", 0.6, 0, function()
 		if not notMonk:IsValid() then
 			timer.Remove("gm13_notgrigori_lvl_2")
 			return
@@ -195,58 +195,80 @@ local function SetGregoriLv2Power(notMonk)
 		manhack:Spawn()
 		manhack:Activate()
 		manhack:AddEntityRelationship(notMonk, D_LI, 99)
+		notMonk:AddEntityRelationship(manhack, D_LI, 99)
 	end)
 end
 
 -- Thanks, Meteor Shower
 -- https://steamcommunity.com/sharedfiles/filedetails/?id=138376105
 local function SetGregoriLv3Power(notMonk)
-	timer.Create("gm13_notgrigori_lvl_3", 0.6, 10, function()
+	timer.Simple(60, function()
+		if notMonk:IsValid() then
+			notMonk:Remove()
+		end
+	end)
+
+	timer.Create("gm13_notgrigori_lvl_3_pos", 10, 0, function()
+		if not notMonk:IsValid() then
+			timer.Remove("gm13_notgrigori_lvl_3_pos")
+			return
+		end
+
+        local validPlyPosEnts = {}
+
+        for k, posEnt in ipairs(ents.FindByName("positionMesh")) do
+            table.insert(validPlyPosEnts, posEnt:GetPos())
+        end
+
+		notMonk:SetPos(validPlyPosEnts[math.random(#validPlyPosEnts)] + Vector(0, 0, 75))
+	end)
+
+	timer.Create("gm13_notgrigori_lvl_3", 0.33, 0, function()
 		if not notMonk:IsValid() then
 			timer.Remove("gm13_notgrigori_lvl_3")
 			return
 		end
 
-		local damage = 25
+		local damage = 5
 		local magnitude = 200
 		local force = notMonk:GetForward() * 60000
-		local forceAngle = Angle(math.random(-45, 10), math.random(0, 360), 0)
-		force:Rotate(forceAngle)
+		local ang = Angle(math.random(-15, -55), math.random(0, 360), 0)
+		force:Rotate(ang)
 
-		local meteor = ents.Create("prop_physics")
-		meteor:SetModel("models/props_phx/mk-82.mdl")
-		meteor:SetAngles(forceAngle)
-		meteor:PhysicsInit(SOLID_VPHYSICS)
-		meteor:SetMoveType(MOVETYPE_VPHYSICS)
-		meteor:SetSolid(SOLID_VPHYSICS)
-		meteor:SetPos(notMonk:GetPos() + Vector(0, 0, 75))
-		meteor:Spawn()
-		meteor:Activate()
+		local missile = ents.Create("prop_physics")
+		missile:SetModel("models/props_phx/mk-82.mdl")
+		missile:SetAngles(ang)
+		missile:PhysicsInit(SOLID_VPHYSICS)
+		missile:SetMoveType(MOVETYPE_VPHYSICS)
+		missile:SetSolid(SOLID_VPHYSICS)
+		missile:SetPos(notMonk:GetPos() + Vector(0, 0, 75))
+		missile:Spawn()
+		missile:Activate()
 
-		local phys = meteor:GetPhysicsObject()
+		local phys = missile:GetPhysicsObject()
 		if phys:IsValid() then
 			phys:Wake()
 
-			phys:SetMass(10)
+			phys:SetMass(15)
 			phys:ApplyForceCenter(force)
 		end
 
 		local trail = ents.Create("env_fire_trail")
-		trail:SetPos(meteor:GetPos())
-		trail:SetParent(meteor)
+		trail:SetPos(missile:GetPos())
+		trail:SetParent(missile)
 		trail:Spawn()
 		trail:Activate()
 		
-		meteor:AddCallback("PhysicsCollide", function()
-			local pos = meteor:GetPos()
+		missile:AddCallback("PhysicsCollide", function()
+			local pos = missile:GetPos()
 			local scale = magnitude / 100.0
 			local effectData = EffectData()
 			effectData:SetStart(pos)
 			effectData:SetOrigin(pos)
 			effectData:SetScale(scale)
-			util.Effect("meteor_explosion", effectData) 
-			util.BlastDamage(meteor, meteor, pos, magnitude, damage)
-			meteor:EmitSound("ambient/explosions/explode_4.wav", 90 * scale, 100)
+			util.Effect("missile_explosion", effectData) 
+			util.BlastDamage(missile, missile, pos, magnitude, damage)
+			missile:EmitSound("ambient/explosions/explode_4.wav", 90 * scale, 100)
 		end)
 	end)
 end
@@ -282,9 +304,6 @@ local function CreateNotGrigori(ratmansTable, pos)
 			notMonk:SetPos(pos)
 			notMonk:SetAngles(Angle(0, 190, 0))
 			notMonk:Spawn()
-			notMonk:SetNWFloat("CustomHealth", 1000)
-			notMonk:SetHealth(1000)
-			notMonk:SetMaxHealth(1000)
 			notMonk:SetNWBool("isdead", false)
 			notMonk:Give("weapon_annabelle")
 
@@ -294,7 +313,7 @@ local function CreateNotGrigori(ratmansTable, pos)
 			GM13.Ent:BlockContextMenu(notMonk, true)
 			GM13.NPC:AttackClosestPlayer(notMonk)
 			GM13.Ent:SetDamageCallback(notMonk, CheckGrigoriHealth)
-			GM13.Ent:SetCursed(notMon, true)
+			GM13.Ent:SetCursed(notMonk, true)
 
 			for _, ply in ipairs(player.GetHumans()) do
 				ply:GodDisable()
@@ -314,15 +333,31 @@ local function CreateNotGrigori(ratmansTable, pos)
 
 			notMonk:GetActiveWeapon():SetClip1(50000)
 
-			local coneLevel = GM13.Event.Memory:Get("coneLevel")
+			local coneLevel = GM13.Event.Memory:Get("coneLevel") or 1
 
-			if coneLevel >= 2 then
+			if coneLevel == 2 then
+				notMonk:SetNWFloat("CustomHealth", 1000)
+				notMonk:SetHealth(1000)
+				notMonk:SetMaxHealth(1000)
+
 				SetGregoriLv2Power(notMonk)
 			end
 
-			if coneLevel >= 3 then
-				SetGregoriLv3Power(notMonk)
+			if coneLevel == 3 then		
+				notMonk:SetNWFloat("CustomHealth", 30000)
+				notMonk:SetHealth(30000)
+				notMonk:SetMaxHealth(30000)
+
+				timer.Simple(1.5, function()
+					if notMonk:IsValid() then
+						SetGregoriLv3Power(notMonk)
+
+						notMonk:SetPos(Vector(-1406.98, 453.33, -100))
+					end
+				end)
 			end
+
+			ratmansTable:TakeDamage(100, notMonk)
 		end
 	end)
 
@@ -390,6 +425,7 @@ local function SpawnProps(propsTab)
 		prop:SetHealth(1)
 		prop:SetName("gm13_not_grigori_prop")
 		prop:SetVar("ready_for_hit_zprop", true)
+		prop:SetRenderFX(kRenderFxPulseFastWider)
 		
 		GM13.Ent:SetCursed(prop, true)
 
@@ -407,7 +443,6 @@ local function SpawnProps(propsTab)
 				ConvertProp(prop, propTab)
 			end
 		end)
-		
 	end
 end
 
@@ -431,6 +466,7 @@ local function CreateEvent()
 				Angle(0,0,0)
 			},
 			pos = {
+				-- Vector(2009.48, 3949.19, -167.97) -- For tests
 				Vector(738.694275, -1828.850708, 1360.031250),
 				Vector(754.604919, -1361.564331, 1360.031250),
 				Vector(-2856.869141, -2388.120361, 284.031250),
@@ -448,7 +484,10 @@ local function CreateEvent()
 		{
 			model = "models/props_combine/breenglobe.mdl",
 			ang = { Angle(0,190,0) },
-			pos = { Vector(-4754.571289, 4893.835449, 2688.031250) },
+			pos = { 
+				-- Vector(2011.41, 3869.93, -167.97) -- For tests
+				Vector(-4754.571289, 4893.835449, 2688.031250)
+			},
 			conversion = { 
 				model = "models/props_c17/doll01.mdl",
 				finalPos = Vector(2284.38, 3547.02, -120.69)
@@ -457,7 +496,10 @@ local function CreateEvent()
 		{
 			model = "models/props_trainstation/trashcan_indoor001a.mdl",
 			ang = { Angle(0,190,0) },
-			pos = { Vector(-3080.348389, -1089.743774, -31.968750) },
+			pos = {
+				-- Vector(2025.86, 4011.33, -167.97) -- For tests
+				Vector(-3080.348389, -1089.743774, -31.968750)
+			},
 			conversion = { 
 				model = "models/Gibs/HGIBS.mdl",
 				finalPos = Vector(2284.38, 3557.02, -100.69)
@@ -466,7 +508,10 @@ local function CreateEvent()
 		{
 			model = "models/props_interiors/Furniture_shelf01a.mdl",
 			ang = { Angle(0,90,0) },
-			pos = { Vector(2352.191162, 3370.543945, -127.052246) },
+			pos = {
+				-- Vector(2017.78, 3809.61, -167.97) -- For tests
+				Vector(2352.191162, 3370.543945, -127.052246)
+			},
 			conversion = { 
 				model = "models/maxofs2d/companion_doll.mdl",
 				finalPos = Vector(2284.38, 3557.02, -85.69)
@@ -475,7 +520,10 @@ local function CreateEvent()
 		{
 			model = "models/props_combine/breenglobe.mdl",
 			ang = { Angle(0,190,0) },
-			pos = { Vector(778.120178, -2107.381836, 688.031250) },
+			pos = {
+				-- Vector(2022.28, 3743.76, -167.97) -- For tests
+				Vector(778.120178, -2107.381836, 688.031250)
+			},
 			conversion = { 
 				model = "models/props_c17/doll01.mdl",
 				finalPos = Vector(2284.38, 3537.02, -120.69)
@@ -484,7 +532,10 @@ local function CreateEvent()
 		{
 			model = "models/props_interiors/Furniture_Lamp01a.mdl",
 			ang = { Angle(0,0,0) },
-			pos = { Vector(2000.031250, 3534.645508, -150.968750) },
+			pos = {
+				-- Vector(2027.11, 3683.95, -167.97) -- For tests
+				Vector(2000.031250, 3534.645508, -150.968750)
+			},
 			conversion = { 
 				model = "models/props_c17/doll01.mdl",
 				finalPos = Vector(2284.38, 3567.02, -120.69)
@@ -493,7 +544,10 @@ local function CreateEvent()
 		{
 			model = "models/props_combine/breenglobe.mdl",
 			ang = { Angle(0,0,0) },
-			pos = { Vector(-2903.97, 448.03, -303.97) },
+			pos = {
+				-- Vector(2031.2, 3633.69, -167.97) -- For tests
+				Vector(-2903.97, 448.03, -303.97)
+			},
 			conversion = { 
 				model = "models/props_c17/doll01.mdl",
 				finalPos = Vector(2284.38, 3577.02, -120.69)
