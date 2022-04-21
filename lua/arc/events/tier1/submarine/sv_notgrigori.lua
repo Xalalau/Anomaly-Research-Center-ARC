@@ -69,7 +69,7 @@ local function SetConeAutoHeal()
 				ent:SetHealth(ent:Health() + 3)
 				ent:EmitSound("items/medshot4.wav")
 
-				if ent:IsPlayer() and currentLevel >= 3 then
+				if ent:IsPlayer() and currentLevel >= 4 then
 					ent:SetArmor(ent:Armor() + 3)
 					ent:EmitSound("items/battery_pickup.wav")
 
@@ -202,13 +202,13 @@ end
 -- Thanks, Meteor Shower
 -- https://steamcommunity.com/sharedfiles/filedetails/?id=138376105
 local function SetGregoriLv3Power(notMonk)
-	timer.Simple(60, function()
+	timer.Simple(280, function()
 		if notMonk:IsValid() then
 			notMonk:Remove()
 		end
 	end)
 
-	timer.Create("gm13_notgrigori_lvl_3_pos", 10, 0, function()
+	timer.Create("gm13_notgrigori_lvl_3_pos", 20, 0, function()
 		if not notMonk:IsValid() then
 			timer.Remove("gm13_notgrigori_lvl_3_pos")
 			return
@@ -344,7 +344,7 @@ local function CreateNotGrigori(ratmansTable, pos)
 			end
 
 			if coneLevel == 3 then		
-				notMonk:SetNWFloat("CustomHealth", 30000)
+				notMonk:SetNWFloat("CustomHealth", 25000)
 				notMonk:SetHealth(30000)
 				notMonk:SetMaxHealth(30000)
 
@@ -498,7 +498,10 @@ local function CreateEvent()
 			ang = { Angle(0,190,0) },
 			pos = {
 				-- Vector(2025.86, 4011.33, -167.97) -- For tests
-				Vector(-3080.348389, -1089.743774, -31.968750)
+				Vector(-2927.56, -1234.36, -94.97),
+				Vector(-2926.73, -1338.33, -94.97),
+				Vector(-2988.31, -1385.34, -94.97),
+				Vector(-3063.34, -1380.03, -94.97)
 			},
 			conversion = { 
 				model = "models/Gibs/HGIBS.mdl",
