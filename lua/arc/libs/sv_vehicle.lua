@@ -29,9 +29,9 @@ function CGM13.Vehicle:Break(vehicle, value)
     if not vehicle or not IsValid(vehicle) or not vehicle:IsVehicle() then return end
 
     if vehicle.IsSimfphyscar then
-        CGM13.addon:BreakSimphys(vehicle)
+        CGM13.Addon:BreakSimphys(vehicle)
     elseif vehicle.IsScar then
-        CGM13.addon:BreakSCar(vehicle)    
+        CGM13.Addon:BreakSCar(vehicle)    
     else
         CGM13.Vehicle:BreakHL2Vehicle(vehicle)
     end
@@ -77,9 +77,9 @@ end
 hook.Add("VehicleMove", "cgm13_vehicle_control", function(ply, vehicle)
     if CGM13.Vehicle:IsBroken(vehicle) then
         if vehicle.IsSimfphyscar then
-            CGM13.addon:BreakSimphys(vehicle)
+            CGM13.Addon:BreakSimphys(vehicle)
         elseif vehicle.IsScar then
-            CGM13.addon:BreakSCar(vehicle)    
+            CGM13.Addon:BreakSCar(vehicle)    
         else
             CGM13.Vehicle:BreakHL2Vehicle(vehicle)
         end
