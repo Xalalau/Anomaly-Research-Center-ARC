@@ -35,6 +35,7 @@ local function CreateEvent()
             playerStart:SetModel("models/editor/playerstart.mdl")
             playerStart:SetPos(pos)
             playerStart:SetAngles(Angle(0,180,0))
+            playerStart:SetName("Chronus")
             playerStart:Spawn()
         end
     end)
