@@ -27,7 +27,7 @@ local function CreateEvent()
                             ["classiclight"] = true
                         }
 
-                        if supported[ent:GetClass()] and ent:VisibleVec(visiblePoint) then
+                        if ent:GetClass() and supported[ent:GetClass()] and ent:VisibleVec(visiblePoint) then
                             if math.random(1, 100) <= 15 then
                                 local initialState = GM13.Light:IsOn(ent)
                                 GM13.Light:Blink(ent, math.random(1, 2), initialState)
