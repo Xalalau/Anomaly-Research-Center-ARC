@@ -617,7 +617,7 @@ local function CreateEvent()
 		itemsOnTable = itemsOnTable + 1
 		ent:EmitSound("physics/metal/metal_solid_impact_hard4.wav")
 
-		if ratmansTable and itemsOnTable >= 7 then
+		if ratmansTable and ratmansTable:IsValid() and itemsOnTable >= 7 then
 			itemsOnTable = 0
 			CreateNotGrigori(ratmansTable, notGrigoriPos)
 		end
