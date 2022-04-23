@@ -14,15 +14,19 @@ local function CanPlayersSeeEntity(ent)
     return false
 end
 
-local function ArePlayersNear(ent, radius)
+local function IsPlayerNear(ply, ent, radius)
     for _,v in pairs(ents.FindInSphere(ent:GetPos(), radius)) do
-        if v:IsPlayer() then return true end
+        if v == ply then return true end
     end
     return false
 end
 
 local function CreateEvent()
     local playerStart
+    local maxTeleport
+
+    local teleportActivated = false
+    local teleportCount = 0
 
     timer.Create(timerName, ISGM13 and 30 or 100, 0, function()
         if playerStart and IsValid(playerStart) then return end
@@ -35,20 +39,65 @@ local function CreateEvent()
             playerStart:SetModel("models/editor/playerstart.mdl")
             playerStart:SetPos(pos)
             playerStart:SetAngles(Angle(0,180,0))
-            playerStart:SetName("Chronus")
+            playerStart:SetName("Satus")
             playerStart:Spawn()
+
+            maxTeleport = math.random(1, 10)
+
+            hook.Add("PlayerSpawn", "gm13_playerspawn_control", function(ply)
+                if !IsValid(playerStart) then
+                    hook.Remove("PlayerSpawn", "gm13_playerspawn_control")
+                    return
+                end
+
+                ply:SetPos(playerStart:GetPos())
+                ply:SetAngles(playerStart:GetAngles())
+            end)
         end
     end)
 
-    timer.Create("gm13_playerstart_control", 2, 0, function()
+    timer.Create("gm13_playerstart_control", 1, 0, function()
         if !IsValid(playerStart) then return end
 
-        if CanPlayersSeeEntity(playerStart) and math.random(1, 10) == 10 then
+        if not teleportActivated and (CanPlayersSeeEntity(playerStart) and math.random(1, 6) == 6) then
             playerStart:Remove()
         end
 
-        if ArePlayersNear(playerStart, 650) then
-            playerStart:Remove()
+        for i = 1, #player.GetHumans() do
+            local ply = player.GetHumans()[1]
+
+            if teleportActivated then
+                if !ply:Alive() or !IsPlayerNear(ply, playerStart, 1200) then
+                    playerStart:Remove()
+                    teleportActivated = false
+                end
+            end
+
+            if IsPlayerNear(ply, playerStart, 500) then
+                if math.random(1, 5) == 5 then
+                    teleportActivated = true
+                end
+
+                if teleportActivated then
+                    if (teleportCount > maxTeleport) or (math.random(1, 10) == 10) then
+                        playerStart:Remove()
+                        teleportActivated = false
+    
+                        return
+                    end
+    
+                    local spawnpoints = ents.FindByClass("info_player_start")
+                    local pos = spawnpoints[math.random(#spawnpoints)]:GetPos()
+                    local ang = (ply:GetPos() - pos):Angle()
+        
+                    playerStart:SetPos(pos)
+                    playerStart:SetAngles(Angle(0, ang.y, 0))
+    
+                    teleportCount = teleportCount + 1
+                else
+                    playerStart:Remove()
+                end
+            end
         end
     end)
 
