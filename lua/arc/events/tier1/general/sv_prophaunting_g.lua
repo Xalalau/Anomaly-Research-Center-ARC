@@ -63,7 +63,7 @@ local function CreateEvent()
                         local rChance = math.random(1, 2)
                         local scale = (rChance == 1 and 1.3) or 0.70
                         GM13.Ent:Resize(selectedProp, scale)
-                    elseif mode == 3 then
+                    elseif mode == 3 and #props >= 2 then
                         -- Swap Props
 
                         props[selectedPropIndex] = nil
