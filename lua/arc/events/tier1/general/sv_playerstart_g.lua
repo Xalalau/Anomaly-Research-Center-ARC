@@ -69,7 +69,9 @@ local function CreateEvent()
             if teleportActivated then
                 if !ply:Alive() or !IsPlayerNear(ply, playerStart, 1200) then
                     playerStart:Remove()
+
                     teleportActivated = false
+                    teleportCount = 0
                 end
             end
 
@@ -82,6 +84,7 @@ local function CreateEvent()
                     if (teleportCount > maxTeleport) or (math.random(1, 10) == 10) then
                         playerStart:Remove()
                         teleportActivated = false
+                        teleportCount = 0
     
                         return
                     end
