@@ -4,7 +4,7 @@ local maxConeLevel = 4
 local propsCanSpawn
 
 GM13.Event.Memory.Dependency:SetDependent(eventName, "ratmanReady", "savedCitizen")
-GM13.Event.Memory.Dependency:SetProvider(eventName, "coneLevel")
+GM13.Event.Memory.Dependency:SetProvider(eventName, "coneLevel", "coneMaxLevel")
 
 local function _PrintMessage(messageType, message)
 	if debugMessage then
@@ -19,6 +19,10 @@ local function SetConeAutoHeal()
 		curseDetector:SetNWBool("readyheal", true)
 
 		local currentLevel = GM13.Event.Memory:Get("coneLevel") or 1
+
+		if currentLevel == maxConeLevel and not GM13.Event.Memory:Get("coneMaxLevel") then
+			GM13.Event.Memory:Set("coneMaxLevel", true)
+		end
 
 		if not currentLevel then return end
 
@@ -455,7 +459,7 @@ local function CreateEvent()
 		end)
 	end
 
-	if GM13.Event.Memory:Get("coneLevel") == maxConeLevel then return end
+	if GM13.Event.Memory:Get("coneMaxLevel") then return end
 
 	local propsTab = {
 		{
@@ -498,10 +502,10 @@ local function CreateEvent()
 			ang = { Angle(0,190,0) },
 			pos = {
 				-- Vector(2025.86, 4011.33, -167.97) -- For tests
-				Vector(-2927.56, -1234.36, -94.97),
-				Vector(-2926.73, -1338.33, -94.97),
-				Vector(-2988.31, -1385.34, -94.97),
-				Vector(-3063.34, -1380.03, -94.97)
+				Vector(-2929.99, -1234.92, -142.97),
+				Vector(-2923.32, -1334.41, -142.97),
+				Vector(-2993.5, -1390.25, -142.97),
+				Vector(-3059.49, -1368.22, -142.97)
 			},
 			conversion = { 
 				model = "models/Gibs/HGIBS.mdl",
