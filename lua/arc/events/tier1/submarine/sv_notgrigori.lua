@@ -401,6 +401,7 @@ local function ConvertProp(prop, propTab)
 		GM13.Ent:BlockToolgun(convertedProp, true)
 		GM13.Ent:BlockContextMenu(convertedProp, true)
 		GM13.Ent:FadeIn(convertedProp, 1)
+		GM13.Ent:SetCursed(convertedProp, true)
 		
 		convertedProp:EmitSound("ambient/levels/canals/toxic_slime_gurgle".. math.random(2, 8) .. ".wav", 90)
 
