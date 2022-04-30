@@ -75,6 +75,8 @@ end
 
 -- Keep vehicles broken
 hook.Add("VehicleMove", "cgm13_vehicle_control", function(ply, vehicle)
+    if not vehicle or not IsValid(vehicle) then return end
+
     if CGM13.Vehicle:IsBroken(vehicle) then
         if vehicle.IsSimfphyscar then
             CGM13.Addon:BreakSimphys(vehicle)
