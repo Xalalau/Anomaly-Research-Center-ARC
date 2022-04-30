@@ -9,11 +9,11 @@
 ]]
 
 CGM13 = { -- Community GM13
-	name = "arc",
+	luaFolder = "arc",
 	Vehicle = {},
 	Addon = {}
 }
 
-hook.Add("Initialize", CGM13.name .. "_init", function()
+hook.Add("Initialize", CGM13.luaFolder .. "_init", function()
 	GM13:IncludeBase(CGM13)
 end)
