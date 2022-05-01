@@ -59,7 +59,7 @@ hook.Add("EntityEmitSound", "cgm13_GetSCarSoundList", function(data)
     if not data.Entity:IsVehicle() then return end
 
     local ent = data.Entity
-    local soundList = ent:GetVar("SoundTable")
+    local soundList = ent:GetVar("SoundTable") or {}
 
     table.insert(soundList, data.SoundName)
     ent:SetVar("SoundTable", soundList)
