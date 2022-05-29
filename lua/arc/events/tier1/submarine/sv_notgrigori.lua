@@ -49,20 +49,22 @@ local function SetConeAutoHeal()
 			if curseDetector:GetNWBool("readyheal") then
 				curseDetector:SetNWBool("readyheal", false)
 
-				local effectdata = EffectData()
-				effectdata:SetOrigin(ent:EyePos() - Vector(0, 0, 5))
-				effectdata:SetStart(curseDetector.light:GetPos())
+				if curseDetector.light:IsValid() then
+					local effectdata = EffectData()
+					effectdata:SetOrigin(ent:EyePos() - Vector(0, 0, 5))
+					effectdata:SetStart(curseDetector.light:GetPos())
 
-				curseDetector.light:SetColor(Color(47, 225, 237, 255))
-				curseDetector.light:SetOn(true)
-				timer.Simple(0.2, function()
-					if curseDetector:IsValid() then
-						curseDetector.light:SetOn(false)
-						curseDetector.light:SetColor(Color(255, 255, 255, 255))
-					end
-				end)
+					curseDetector.light:SetColor(Color(47, 225, 237, 255))
+					curseDetector.light:SetOn(true)
+					timer.Simple(0.2, function()
+						if curseDetector:IsValid() then
+							curseDetector.light:SetOn(false)
+							curseDetector.light:SetColor(Color(255, 255, 255, 255))
+						end
+					end)
 
-				util.Effect("ToolTracer", effectdata)
+					util.Effect("ToolTracer", effectdata)
+				end
 
 				timer.Simple(2 / (currentLevel * 1.6), function()
 					if curseDetector:IsValid() then
