@@ -591,17 +591,22 @@ local function CreateEvent()
 			ratmansTable = ents.FindByName("ratman_table")[1]
 
 			if ratmansTable then
-				SpawnProps(propsTab)
-				propsCanSpawn = false
+				local isTableStanding = ratmansTable:GetUp().z >= 0.99
+				local isOnGround = util.QuickTrace(ratmansTable:GetPos(), ratmansTable:GetUp() * -20).HitWorld
 
-				ratmansTable:SetMoveType(MOVETYPE_NONE)
-				ratmansTable:SetNotSolid(true)
-				GM13.Ent:BlockPhysgun(ratmansTable, true)
-				GM13.Ent:BlockToolgun(ratmansTable, true)
-				GM13.Ent:BlockContextMenu(ratmansTable, true)
-				GM13.Prop:CallOnBreak(ratmansTable, "ratman_table", function()
-					DestroyProps()
-				end)
+				if isTableStanding and isOnGround then 
+					SpawnProps(propsTab)
+					propsCanSpawn = false
+
+					ratmansTable:SetMoveType(MOVETYPE_NONE)
+					ratmansTable:SetNotSolid(true)
+					GM13.Ent:BlockPhysgun(ratmansTable, true)
+					GM13.Ent:BlockToolgun(ratmansTable, true)
+					GM13.Ent:BlockContextMenu(ratmansTable, true)
+					GM13.Prop:CallOnBreak(ratmansTable, "ratman_table", function()
+						DestroyProps()
+					end)
+				end
 			end
 		end
 	end)
