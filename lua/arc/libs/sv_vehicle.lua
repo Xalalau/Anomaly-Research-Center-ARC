@@ -38,9 +38,9 @@ function CGM13.Vehicle:Break(vehicle, value)
 
     GM13.Ent:SetMute(vehicle, true)
     
-    local soundTable = vehicle:GetVar("SoundTable")
+    local soundTable = vehicle:GetVar("SoundTable") or {}
 
-    for _,sounds in pairs(soundTable) do
+    for _, sounds in ipairs(soundTable) do
         vehicle:StopSound(sounds)
     end
 
@@ -49,20 +49,22 @@ end
 
 -- Some vehicle engine sounds don't stop upon engine break
 -- So we add it to a table and stop the sound when necessary
-hook.Add("OnEntityCreated", "cgm13_SetSoundTable", function(e)
-    if not e:IsVehicle() then return end
-    local StopSoundTable = {}
-    e:SetVar("SoundTable", StopSoundTable)
+hook.Add("OnEntityCreated", "cgm13_SetSoundTable", function(ent)
+    if not ent:IsVehicle() then return end
+
+    if ent:GetVar("SoundTable") then
+        ent:SetVar("SoundTable", {})
+    end
 end)
 
 hook.Add("EntityEmitSound", "cgm13_GetSCarSoundList", function(data)
-    if not data.Entity:IsVehicle() then return end
-
     local ent = data.Entity
-    local soundList = ent:GetVar("SoundTable")
 
-    table.insert(soundList, data.SoundName)
-    ent:SetVar("SoundTable", soundList)
+    if not ent:IsVehicle() then return end
+
+    if ent:GetVar("SoundTable") then
+        table.insert(ent:GetVar("SoundTable"), data.SoundName)
+    end
 end)
 
 -- Detour ENT.SetNWBool to block attempts to use broken vehicles
