@@ -52,18 +52,18 @@ end
 hook.Add("OnEntityCreated", "cgm13_SetSoundTable", function(ent)
     if not ent:IsVehicle() then return end
 
-    if ent:GetVar("SoundTable") then
-        ent:SetVar("SoundTable", {})
-    end
+    ent:SetVar("SoundTable", {})
 end)
 
 hook.Add("EntityEmitSound", "cgm13_GetSCarSoundList", function(data)
     local ent = data.Entity
 
-    if not ent:IsVehicle() then return end
+    if ent:IsVehicle() then
+        local soundTable = ent:GetVar("SoundTable")
 
-    if ent:GetVar("SoundTable") then
-        table.insert(ent:GetVar("SoundTable"), data.SoundName)
+        if soundTable then
+            table.insert(soundTable, data.SoundName)
+        end
     end
 end)
 
