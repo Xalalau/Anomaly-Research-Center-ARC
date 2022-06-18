@@ -12,7 +12,7 @@ local function CreateProp(model, pos, ang)
 
     local phys = prop:GetPhysicsObject()
 
-    if IsValid(phys) then
+    if phys:IsValid() then
         phys:Wake()
     end
 

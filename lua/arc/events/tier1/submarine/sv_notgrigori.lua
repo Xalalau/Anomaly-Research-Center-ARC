@@ -323,6 +323,7 @@ local function CreateNotGrigori(ratmansTable, pos)
 
 			for _, ply in ipairs(player.GetHumans()) do
 				ply:GodDisable()
+				notMonk:AddEntityRelationship(ply, D_HT, 99)
 			end
 
 			for k, ent in ipairs(ents.GetAll()) do
@@ -341,18 +342,24 @@ local function CreateNotGrigori(ratmansTable, pos)
 
 			local coneLevel = GM13.Event.Memory:Get("coneLevel") or 1
 
-			if coneLevel == 2 then
-				notMonk:SetNWFloat("CustomHealth", 1000)
-				notMonk:SetHealth(1000)
+			if coneLevel == 1 then
 				notMonk:SetMaxHealth(1000)
+				notMonk:SetHealth(1000)
+				notMonk:SetNWFloat("CustomHealth", 1000)
+			end
+
+			if coneLevel == 2 then
+				notMonk:SetMaxHealth(1500)
+				notMonk:SetHealth(1500)
+				notMonk:SetNWFloat("CustomHealth", 1500)
 
 				SetGregoriLv2Power(notMonk)
 			end
 
 			if coneLevel == 3 then		
-				notMonk:SetNWFloat("CustomHealth", 25000)
-				notMonk:SetHealth(30000)
 				notMonk:SetMaxHealth(30000)
+				notMonk:SetHealth(30000)
+				notMonk:SetNWFloat("CustomHealth", 25000)
 
 				timer.Simple(1.5, function()
 					if notMonk:IsValid() then
@@ -395,7 +402,7 @@ local function ConvertProp(prop, propTab)
 
 		local physObj = convertedProp:GetPhysicsObject()
 		
-		if IsValid(physObj) then
+		if physObj:IsValid() then
 			physObj:Wake()
 		end
 		
@@ -438,7 +445,7 @@ local function SpawnProps(propsTab)
 
 		local physObj = prop:GetPhysicsObject()
 		
-		if IsValid(physObj) then
+		if physObj:IsValid() then
 			physObj:Wake()
 		end
 		

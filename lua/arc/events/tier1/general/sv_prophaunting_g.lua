@@ -50,6 +50,8 @@ local function CreateEvent()
 
                         local obj = selectedProp:GetPhysicsObject() or selectedProp
 
+                        if not phys:IsValid() then return end
+
                         local originalMass = obj:GetMass()
                         local force = selectedProp:GetForward() * 800
                         force:Rotate(Angle(math.random(-35, 35), math.random(0, 360), 0))
